@@ -686,7 +686,82 @@ body {
   margin-right: 3px;
 }
 
-/* ── BOTTOM NAV ── */
+/* ── PROJECT FILTER BAR (gantt only) ── */
+#project-filter-bar {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  flex-shrink: 0;
+  scrollbar-width: none;
+}
+#project-filter-bar::-webkit-scrollbar { display: none; }
+#project-filter-bar.visible { display: flex; }
+
+.proj-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1.5px solid var(--border);
+  background: var(--surface2);
+  color: var(--text-muted);
+  white-space: nowrap;
+  transition: all 0.14s ease;
+  flex-shrink: 0;
+}
+.proj-filter-chip.active {
+  color: white;
+  border-color: transparent;
+}
+.proj-filter-chip:active { transform: scale(0.96); }
+
+/* Gantt project label badge */
+.gantt-proj-badge {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-right: 4px;
+}
+
+/* Gantt project section header */
+.gantt-proj-section {
+  display: flex;
+  flex-direction: row;
+  height: 28px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  position: sticky;
+  left: 0;
+  z-index: 4;
+}
+.gantt-proj-section-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
 #bottom-nav {
   height: var(--nav-h);
   padding-bottom: var(--safe-bottom);
@@ -1188,6 +1263,194 @@ input, textarea, select, button {
 *:not(.gantt-scroll) { scrollbar-width: none; }
 *:not(.gantt-scroll)::-webkit-scrollbar { display: none; }
 
+/* ── TABLE VIEW ── */
+#view-table {
+  height: 100%;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: auto;
+  padding: 24px 32px;
+  box-sizing: border-box;
+  background: var(--bg);
+}
+.table-wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.table-toolbar-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.3px;
+}
+.table-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.proj-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.proj-table thead th {
+  background: var(--surface2);
+  font-family: var(--sans);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  padding: 10px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.proj-table thead th:first-child { border-radius: var(--radius) 0 0 0; }
+.proj-table thead th:last-child  { border-radius: 0 var(--radius) 0 0; }
+.proj-table tbody tr {
+  border-bottom: 1px solid var(--border-light);
+  transition: background 0.12s;
+  cursor: pointer;
+}
+.proj-table tbody tr:last-child { border-bottom: none; }
+.proj-table tbody tr:hover { background: var(--surface2); }
+.proj-table tbody tr.active-proj { background: var(--accent-dim); }
+.proj-table td {
+  padding: 14px 16px;
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--text);
+  vertical-align: middle;
+}
+/* col widths */
+.proj-table .col-name    { width: 22%; min-width: 160px; }
+.proj-table .col-owner   { width: 14%; min-width: 110px; }
+.proj-table .col-status  { width: 14%; min-width: 120px; }
+.proj-table .col-stats   { width: 18%; min-width: 140px; }
+.proj-table .col-next    { width: 32%; min-width: 180px; }
+/* name cell */
+.tbl-name-cell { display: flex; align-items: center; gap: 10px; }
+.tbl-name-dot  { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.tbl-name-text { font-weight: 600; font-size: 13px; color: var(--text); }
+.tbl-active-badge {
+  font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--accent); background: var(--accent-dim); border: 1px solid var(--accent-border);
+  border-radius: var(--radius-pill); padding: 2px 6px; flex-shrink: 0;
+}
+/* owner cell */
+.table-owner {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 12px; color: var(--text-muted);
+}
+/* status pill (readonly display) */
+.tbl-status-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 11px;
+  border-radius: var(--radius-pill);
+  font-family: var(--sans); font-size: 11px; font-weight: 600;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  transition: opacity 0.12s;
+  white-space: nowrap;
+}
+.tbl-status-pill:hover { opacity: 0.8; }
+.tbl-status-empty {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 11px;
+  border-radius: var(--radius-pill);
+  font-size: 11px; font-weight: 500;
+  color: var(--text-faint);
+  background: var(--surface2); border: 1.5px dashed var(--border);
+  cursor: pointer; transition: all 0.12s;
+}
+.tbl-status-empty:hover { border-color: var(--accent); color: var(--accent); }
+/* stats mini bar */
+.tbl-stats { display: flex; align-items: center; gap: 8px; }
+.tbl-stats-bar {
+  flex: 1; height: 5px; border-radius: 99px;
+  background: var(--surface3); overflow: hidden; min-width: 60px;
+}
+.tbl-stats-bar-fill { height: 100%; border-radius: 99px; transition: width 0.3s ease; }
+.tbl-stats-nums { font-family: var(--mono); font-size: 10px; color: var(--text-faint); white-space: nowrap; }
+.tbl-stats-nums strong { color: var(--text-muted); font-weight: 600; }
+/* next step cell */
+.next-step-cell {
+  display: flex; align-items: center; gap: 8px;
+}
+.next-step-text {
+  font-size: 12px; color: var(--text-muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 240px; display: inline-block;
+}
+.due-tag {
+  font-family: var(--mono); font-size: 10px; color: var(--text-faint);
+  background: var(--surface2); border-radius: var(--radius-pill);
+  padding: 2px 8px; flex-shrink: 0; white-space: nowrap;
+}
+.due-tag.overdue { color: var(--danger); background: rgba(217,48,37,0.08); }
+/* status manager strip */
+.tbl-status-manager {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.tbl-status-manager-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--text-faint); flex-shrink: 0;
+}
+.proj-status-select {
+  display: none; /* hidden — replaced by pill UI */
+}
+.table-empty {
+  padding: 48px 32px;
+  text-align: center;
+  color: var(--text-faint);
+  font-size: 14px;
+}
+/* status picker dropdown */
+.tbl-status-dropdown {
+  position: fixed;
+  z-index: 200;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  padding: 6px;
+  min-width: 170px;
+  display: none;
+}
+.tbl-status-dropdown.open { display: block; }
+.tbl-status-opt {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px; border-radius: 8px;
+  font-size: 12px; font-weight: 500; cursor: pointer;
+  transition: background 0.1s;
+}
+.tbl-status-opt:hover { background: var(--surface2); }
+.tbl-status-opt-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+
 /* ── TRANSITIONS ── */
 .view-enter { animation: fadeIn 0.2s ease; }
 
@@ -1327,7 +1590,7 @@ input, textarea, select, button {
   <!-- HEADER -->
   <div id="header">
     <div class="header-logo">
-      <div class="header-logo-mark">✦</div>
+      <div class="header-logo-mark"><svg viewBox="0 0 16 16" fill="none" width="14" height="14"><rect x="3" y="3" width="10" height="2" rx="1" fill="white"/><rect x="3" y="7" width="7" height="2" rx="1" fill="white"/><rect x="3" y="11" width="9" height="2" rx="1" fill="white"/></svg></div>
       progetti-salesmart
     </div>
     <button class="header-project-btn" id="project-selector-btn" onclick="openProjectsPanel()">
@@ -1336,7 +1599,7 @@ input, textarea, select, button {
       <span class="proj-arrow">▾</span>
     </button>
     <button class="header-add-btn" onclick="openTaskModal(null)" id="add-task-btn">+</button>
-    <button onclick="openSettingsPanel()" style="width:34px;height:34px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:16px;flex-shrink:0;transition:all 0.15s ease" title="Impostazioni">⚙️</button>
+    <button onclick="openSettingsPanel()" style="width:34px;height:34px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:16px;flex-shrink:0;transition:all 0.15s ease" title="Impostazioni"><svg viewBox="0 0 16 16" fill="none" width="16" height="16" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.5"/><path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2M3.4 3.4l1.4 1.4M11.2 11.2l1.4 1.4M3.4 12.6l1.4-1.4M11.2 4.8l1.4-1.4"/></svg></button>
   </div>
 
   <!-- VIEW TABS -->
@@ -1356,12 +1619,22 @@ input, textarea, select, button {
       <svg viewBox="0 0 16 16" fill="currentColor" width="14" height="14"><rect x="1" y="3" width="7" height="2.5" rx="1.25"/><rect x="1" y="7" width="11" height="2.5" rx="1.25"/><rect x="1" y="11" width="9" height="2.5" rx="1.25"/></svg>
       Gantt
     </button>
+    <button class="tab-btn" data-view="table" onclick="switchView('table')">
+      <svg viewBox="0 0 16 16" fill="currentColor" width="14" height="14"><rect x="1" y="1" width="14" height="3" rx="1"/><rect x="1" y="6" width="14" height="3" rx="1"/><rect x="1" y="11" width="14" height="3" rx="1"/></svg>
+      Tabella
+    </button>
   </div>
 
   <!-- FILTER & SORT BAR -->
   <div id="filter-sort-bar">
-    <span style="font-size:11px;font-weight:600;color:var(--text-faint);flex-shrink:0;white-space:nowrap">👤</span>
+    <svg viewBox="0 0 16 16" fill="none" width="14" height="14" stroke="currentColor" stroke-width="1.5" style="flex-shrink:0;color:var(--text-faint)"><circle cx="8" cy="5" r="2.5"/><path d="M3 13c0-2.76 2.24-5 5-5s5 2.24 5 5"/></svg>
     <div id="assignee-chips" style="display:flex;gap:6px;flex-shrink:0"></div>
+  </div>
+
+  <!-- PROJECT FILTER BAR (gantt only) -->
+  <div id="project-filter-bar">
+    <svg viewBox="0 0 16 16" fill="none" width="13" height="13" stroke="currentColor" stroke-width="1.5" style="flex-shrink:0;color:var(--text-faint)"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M5 3V2M11 3V2"/></svg>
+    <div id="project-chips" style="display:flex;gap:6px;flex-shrink:0"></div>
   </div>
 
   <!-- CONTENT -->
@@ -1369,6 +1642,7 @@ input, textarea, select, button {
     <div id="view-list"></div>
     <div id="view-board" style="display:none"></div>
     <div id="view-gantt" style="display:none;flex-direction:column"></div>
+    <div id="view-table" style="display:none"></div>
   </div>
 
 </div>
@@ -1386,7 +1660,7 @@ input, textarea, select, button {
   </div>
   <div class="dp-sep"></div>
   <div class="panel-danger-item" onclick="closeProjectsPanel();confirmResetAll()">
-    <span style="font-size:16px">⚠</span>
+    <svg viewBox="0 0 16 16" fill="none" width="16" height="16" stroke="currentColor" stroke-width="1.5"><path d="M8 2L1 14h14L8 2z"/><path d="M8 7v3M8 12v.5"/></svg>
     Reset dati
   </div>
 </div>
@@ -1398,7 +1672,7 @@ input, textarea, select, button {
     <div class="modal-header">
       <div class="modal-check" id="modal-check" onclick="toggleModalDone()"></div>
       <textarea class="modal-title-input" id="modal-title" placeholder="Nome task…" rows="1" oninput="autoResize(this)"></textarea>
-      <button class="modal-close" onclick="closeTaskModal()">✕</button>
+      <button class="modal-close" onclick="closeTaskModal()"><svg viewBox="0 0 12 12" fill="none" width="11" height="11" stroke="currentColor" stroke-width="1.8"><path d="M2 2l8 8M10 2l-8 8"/></svg></button>
     </div>
     <div class="modal-body">
       <textarea class="modal-desc" id="modal-desc" placeholder="Aggiungi una descrizione…" rows="2" oninput="autoResize(this)"></textarea>
@@ -1451,7 +1725,7 @@ input, textarea, select, button {
   <div class="dp-title">Seleziona status</div>
   <div class="dp-option" onclick="pickStatus('todo')"><div class="opt-icon" style="background:var(--todo-bg)">🔵</div>To Do</div>
   <div class="dp-option" onclick="pickStatus('inprogress')"><div class="opt-icon" style="background:var(--inprogress-bg)">🟡</div>In Progress</div>
-  <div class="dp-option" onclick="pickStatus('done')"><div class="opt-icon" style="background:var(--done-bg)">✅</div>Done</div>
+  <div class="dp-option" onclick="pickStatus('done')"><div class="opt-icon" style="background:var(--done-bg)"><svg viewBox="0 0 14 14" fill="none" width="13" height="13" stroke="currentColor" stroke-width="1.8"><path d="M2 7l4 4 6-6"/></svg></div>Done</div>
 </div>
 
 <!-- ASSIGNEE PICKER PANEL -->
@@ -1462,7 +1736,7 @@ input, textarea, select, button {
   <div id="assignee-options"></div>
   <div class="dp-sep"></div>
   <div class="dp-option" id="assignee-custom-row">
-    <div class="opt-icon" style="background:var(--surface3)">✏️</div>
+    <div class="opt-icon" style="background:var(--surface3)"><svg viewBox="0 0 14 14" fill="none" width="13" height="13" stroke="currentColor" stroke-width="1.5"><path d="M9 2l3 3-7 7H2v-3L9 2z"/></svg></div>
     <input id="assignee-custom-input" placeholder="Altro nome…" style="flex:1;background:none;border:none;outline:none;font-family:var(--sans);font-size:14px;color:var(--text);" onclick="event.stopPropagation()">
     <button onclick="confirmCustomAssignee()" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-family:var(--sans);font-size:12px;font-weight:600;cursor:pointer">OK</button>
   </div>
@@ -1491,6 +1765,8 @@ input, textarea, select, button {
   <div class="center-modal">
     <h3>Nuovo progetto</h3>
     <input class="modal-input" id="project-name-input" placeholder="Nome progetto…" maxlength="50"
+      onkeydown="if(event.key==='Enter')document.getElementById('project-owner-input').focus();if(event.key==='Escape')closeProjectModal()">
+    <input class="modal-input" id="project-owner-input" placeholder="Owner (es. Federico)…" maxlength="50"
       onkeydown="if(event.key==='Enter')saveProject();if(event.key==='Escape')closeProjectModal()">
     <div class="center-modal-actions">
       <button class="btn" onclick="closeProjectModal()">Annulla</button>
@@ -1532,7 +1808,7 @@ input, textarea, select, button {
   <div class="dp-title">Impostazioni</div>
 
   <!-- UTENTI -->
-  <div class="settings-section-title">👥 Team</div>
+  <div class="settings-section-title"><svg viewBox="0 0 16 16" fill="none" width="13" height="13" stroke="currentColor" stroke-width="1.5" style="flex-shrink:0"><circle cx="6" cy="5" r="2"/><path d="M2 13c0-2.2 1.8-4 4-4s4 1.8 4 4"/><circle cx="11" cy="5" r="1.5"/><path d="M12 9c1.1.5 2 1.7 2 3"/></svg> Team</div>
   <div id="settings-users-list"></div>
   <div class="settings-add-row">
     <input class="settings-add-input" id="new-user-input" placeholder="Nome utente…" maxlength="40"
@@ -1543,7 +1819,7 @@ input, textarea, select, button {
   <div class="dp-sep"></div>
 
   <!-- TIPOLOGIE TASK -->
-  <div class="settings-section-title">🏷 Tipologie task</div>
+  <div class="settings-section-title"><svg viewBox="0 0 16 16" fill="none" width="13" height="13" stroke="currentColor" stroke-width="1.5" style="flex-shrink:0"><path d="M9 2H3a1 1 0 0 0-1 1v6l6 6 6-6-5-7z"/><circle cx="5.5" cy="6.5" r="1"/></svg> Tipologie task</div>
   <div id="settings-types-list"></div>
   <div class="settings-add-row" style="flex-direction:column;align-items:stretch;gap:10px">
     <input class="settings-add-input" id="new-type-name-input" placeholder="Nome tipologia…" maxlength="30"
@@ -1557,7 +1833,7 @@ input, textarea, select, button {
 
   <div class="dp-sep" style="margin-top:8px"></div>
   <div class="panel-danger-item" onclick="closeSettingsPanel();confirmResetAll()">
-    <span style="font-size:16px">⚠</span>
+    <svg viewBox="0 0 16 16" fill="none" width="16" height="16" stroke="currentColor" stroke-width="1.5"><path d="M8 2L1 14h14L8 2z"/><path d="M8 7v3M8 12v.5"/></svg>
     Reset dati
   </div>
 </div>
@@ -1597,6 +1873,7 @@ let editingTaskId = null;
 let _saveTimer  = null;  // debounce write
 let _sseSource  = null;  // EventSource per sync realtime
 let _filterAssignee = '';   // '' = tutti
+let _filterProjects = [];   // [] = tutti i progetti visibili nel gantt
 
 // ── INDICATORE DI SYNC ──────────────────────────────────────────
 function showSync(icon, msg, color) {
@@ -1646,7 +1923,7 @@ async function rtdbDiag() {
 function save() {
   // Salvataggio locale immediato — sempre, anche offline
   try { localStorage.setItem('flow_v3_p2', JSON.stringify(state)); } catch(_) {}
-  showSync('⏳', 'Salvataggio...', 'neutral');
+  showSync('↻', 'Salvataggio...', 'neutral');
 
   clearTimeout(_saveTimer);
   _saveTimer = setTimeout(async () => {
@@ -1659,11 +1936,11 @@ function save() {
       });
       if (!res.ok) throw new Error('HTTP ' + res.status);
       _rtdbAvailable = true;
-      showSync('☁ Sincronizzato', '', 'ok');
+      showSync('✓ Sincronizzato', '', 'ok');
       console.log('✅ Salvato su Firebase');
     } catch(e) {
       _rtdbAvailable = false;
-      showSync('⚠️ Solo locale', '', 'err');
+      showSync('! Solo locale', '', 'err');
       console.warn('RTDB save fallito:', e.message);
       setTimeout(()=>{ const el=document.getElementById('sync-indicator'); if(el) el.style.opacity='0'; }, 3000);
     } finally {
@@ -1677,7 +1954,7 @@ function save() {
 let _rtdbAvailable = false;
 
 async function load() {
-  showSync('⏳', 'Caricamento...', 'neutral');
+  showSync('↻', 'Caricamento...', 'neutral');
 
   // 1. Prima prova Firebase — è la fonte di verità
   try {
@@ -1690,21 +1967,21 @@ async function load() {
     // Firebase può restituire null se il nodo è vuoto
     if (remote && typeof remote === 'object' && remote.projects && remote.tasks) {
       _applyState(remote, true);
-      showSync('☁ Sincronizzato', '', 'ok');
+      showSync('✓ Sincronizzato', '', 'ok');
       console.log('✅ Stato caricato da Firebase');
       return; // Firebase ha i dati, non serve localStorage
     } else {
       // Firebase raggiungibile ma nodo vuoto — prova localStorage
       console.log('ℹ️ Firebase vuoto, provo localStorage');
       _tryLoadLocalStorage();
-      showSync('✓', 'Pronto', 'ok');
+      showSync('✓ Pronto', '', 'ok');
     }
   } catch(e) {
     // Firebase non raggiungibile — usa localStorage come fallback
     _rtdbAvailable = false;
     console.warn('Firebase non raggiungibile:', e.message);
     _tryLoadLocalStorage();
-    showSync('📱 Offline', '', 'neutral');
+    showSync('– Offline', '', 'neutral');
     setTimeout(()=>{ const el=document.getElementById('sync-indicator'); if(el) el.style.opacity='0'; }, 3000);
   }
 }
@@ -1731,6 +2008,7 @@ function _applyState(s, saveLocal) {
   if (!state.currentView) state.currentView = 'list';
   if (!state.users)       state.users       = [];
   if (!state.taskTypes)   state.taskTypes   = [];
+  if (!state.projectStatuses) state.projectStatuses = [];
   if (!state.projects.find(p => p.id === state.activeProjectId))
     state.activeProjectId = state.projects.length ? state.projects[0].id : null;
   if (saveLocal) try { localStorage.setItem('flow_v3_p2', JSON.stringify(state)); } catch(_) {}
@@ -1765,7 +2043,7 @@ function startRealtimeSync() {
         updateHeader();
         renderCurrentView();
         updateBoardBadge();
-        showSync('🔄', 'Aggiornato', 'ok');
+        showSync('✓ Aggiornato', '', 'ok');
       }
     } catch(_) {}
   });
@@ -1837,8 +2115,8 @@ function renderProjectsPanel() {
       <span class="proj-item-name" onclick="selectProject('${p.id}');closeProjectsPanel()">${escHtml(p.name)}</span>
       ${count>0?`<span class="proj-item-count">${count}</span>`:''}
       ${active?'<span style="color:var(--accent);font-size:16px;flex-shrink:0">✓</span>':''}
-      <button onclick="event.stopPropagation();openRenameProject('${p.id}')" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:4px 8px;font-size:11px;cursor:pointer;color:var(--text-muted);font-family:var(--sans);flex-shrink:0">✏️</button>
-      <button onclick="event.stopPropagation();closeProjectsPanel();confirmDeleteProject('${p.id}')" style="background:rgba(217,48,37,0.08);border:1px solid rgba(217,48,37,0.2);border-radius:8px;padding:4px 8px;font-size:11px;cursor:pointer;color:var(--danger);font-family:var(--sans);flex-shrink:0">🗑</button>
+      <button onclick="event.stopPropagation();openRenameProject('${p.id}')" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:4px 8px;font-size:11px;cursor:pointer;color:var(--text-muted);font-family:var(--sans);flex-shrink:0"><svg viewBox="0 0 16 16" fill="none" width="12" height="12" stroke="currentColor" stroke-width="1.5"><path d="M11 2l3 3-8 8H3v-3L11 2z"/></svg></button>
+      <button onclick="event.stopPropagation();closeProjectsPanel();confirmDeleteProject('${p.id}')" style="background:rgba(217,48,37,0.08);border:1px solid rgba(217,48,37,0.2);border-radius:8px;padding:4px 8px;font-size:11px;cursor:pointer;color:var(--danger);font-family:var(--sans);flex-shrink:0"><svg viewBox="0 0 16 16" fill="none" width="12" height="12" stroke="currentColor" stroke-width="1.5"><path d="M3 4h10M6 4V2h4v2M5 4v9h6V4"/><path d="M7 7v4M9 7v4"/></svg></button>
     </div>`;
   }).join('');
 }
@@ -1874,13 +2152,22 @@ function switchView(v) {
   const ganttEl = document.getElementById('view-gantt');
   ganttEl.style.display = v==='gantt' ? 'flex' : 'none';
   if (v==='gantt') ganttEl.style.flexDirection = 'column';
+  const tableEl = document.getElementById('view-table');
+  tableEl.style.display = v==='table' ? '' : 'none';
+  // Hide filter bar on table view (not task-based)
+  document.getElementById('filter-sort-bar').style.display = v==='table' ? 'none' : '';
+  // Show project filter bar only on gantt
+  const pfBar = document.getElementById('project-filter-bar');
+  if (v==='gantt') { pfBar.classList.add('visible'); renderProjectFilterBar(); }
+  else { pfBar.classList.remove('visible'); }
   renderCurrentView();
   updateBoardBadge();
 }
 function renderCurrentView() {
   if (state.currentView==='list') renderList();
   else if (state.currentView==='board') renderBoard();
-  else renderGantt();
+  else if (state.currentView==='gantt') renderGantt();
+  else if (state.currentView==='table') renderTable();
 }
 
 function updateBoardBadge() {
@@ -1899,9 +2186,9 @@ function emptyState(icon, title, sub) {
 function renderList() {
   renderFilterBar();
   const el = document.getElementById('view-list');
-  if (!state.activeProjectId) { el.innerHTML=emptyState('📁','Nessun progetto','Apri il menu progetti per crearne uno'); return; }
+  if (!state.activeProjectId) { el.innerHTML=emptyState('<svg viewBox="0 0 24 24" fill="none" width="32" height="32" stroke="currentColor" stroke-width="1.2"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg>','Nessun progetto','Apri il menu progetti per crearne uno'); return; }
   const allTasks = activeTasks();
-  if (allTasks.length===0) { el.innerHTML=emptyState('✨','Nessun task','Tocca + per aggiungere il primo task'); return; }
+  if (allTasks.length===0) { el.innerHTML=emptyState('<svg viewBox="0 0 24 24" fill="none" width="32" height="32" stroke="currentColor" stroke-width="1.2"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 12l3 3 5-5"/></svg>','Nessun task','Tocca + per aggiungere il primo task'); return; }
 
   const tasks = filteredSortedTasks(allTasks);
 
@@ -1917,7 +2204,7 @@ function renderList() {
   `).join('');
 
   if (!content && _filterAssignee) {
-    el.innerHTML = emptyState('🔍','Nessun task per questo assegnatario','');
+    el.innerHTML = emptyState('<svg viewBox="0 0 24 24" fill="none" width="32" height="32" stroke="currentColor" stroke-width="1.2"><circle cx="10" cy="10" r="6"/><path d="M14.5 14.5L20 20"/></svg>','Nessun task per questo assegnatario','');
     return;
   }
 
@@ -1948,7 +2235,7 @@ function taskCardHtml(t) {
     <div class="task-card-meta">
       ${t.assignee?`<div class="avatar-sm" style="background:${avatarColor(t.assignee)}">${escHtml(initials(t.assignee))}</div><span class="assignee-name">${escHtml(t.assignee)}</span>`:''}
       ${t.assignee&&t.due?`<div class="meta-sep"></div>`:''}
-      ${t.due?`<span class="date-chip ${overdue?'overdue':''}">📅 ${fmtDate(t.due)}</span>`:''}
+      ${t.due?`<span class="date-chip ${overdue?'overdue':''}"><svg viewBox="0 0 12 12" fill="none" width="10" height="10" stroke="currentColor" stroke-width="1.3" style="flex-shrink:0"><rect x="1" y="2" width="10" height="9" rx="1.5"/><path d="M4 1v2M8 1v2M1 5h10"/></svg> ${fmtDate(t.due)}</span>`:''}
       <div class="meta-spacer"></div>
       ${statusPill(t.status)}
     </div>
@@ -1971,7 +2258,7 @@ function toggleDone(id) {
 function renderBoard() {
   renderFilterBar();
   const el = document.getElementById('view-board');
-  if (!state.activeProjectId) { el.innerHTML=emptyState('📋','Nessun progetto',''); return; }
+  if (!state.activeProjectId) { el.innerHTML=emptyState('<svg viewBox="0 0 24 24" fill="none" width="32" height="32" stroke="currentColor" stroke-width="1.2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h6M8 16h4"/></svg>','Nessun progetto',''); return; }
   const cols = [{id:'todo',label:'To Do'},{id:'inprogress',label:'In corso'},{id:'done',label:'Fatto'}];
   el.innerHTML = cols.map(col => {
     const tasks = filteredSortedTasks(tasksByStatus(col.id));
@@ -2078,13 +2365,73 @@ function addTaskInStatus(status) { const id=createTask('',status); openTaskModal
 // Because labels and day-cells live in the SAME table-row,
 // their heights are always identical — no overlap possible.
 
+function ganttRowHtml(t, rowIdx, totalRows, labelW, totalW, startD, daygridHtml, showProjDot, projColor) {
+  let barHtml = '';
+  if (t.start || t.due) {
+    const s = t.start || t.due, e = t.due || t.start;
+    const offsetDays = daysBetween(startD, s);
+    const spanDays   = Math.max(1, daysBetween(s, e) + 1);
+    const barLeft    = offsetDays * DAY_W + 2;
+    const barWidth   = spanDays * DAY_W - 4;
+    const tp = getTaskType(t.type || '');
+    let barBg, barShadow;
+    if (tp) {
+      barBg = `linear-gradient(135deg,${tp.color}dd,${tp.color})`;
+      barShadow = `0 2px 8px ${tp.color}55`;
+    } else if (t.status === 'done') {
+      barBg = 'linear-gradient(135deg,#c8c4be,#b0aca6)'; barShadow = 'none';
+    } else if (t.status === 'inprogress') {
+      barBg = 'linear-gradient(135deg,#e09000,var(--inprogress-color))'; barShadow = '0 2px 8px rgba(192,120,0,0.25)';
+    } else if (showProjDot && projColor) {
+      barBg = `linear-gradient(135deg,${projColor}cc,${projColor})`; barShadow = `0 2px 8px ${projColor}44`;
+    } else {
+      barBg = 'linear-gradient(135deg,var(--accent),#7b68f0)'; barShadow = '0 2px 8px rgba(91,75,232,0.28)';
+    }
+    const avatarHtml = t.assignee
+      ? `<span class="gantt-bar-avatar" style="background:${avatarColor(t.assignee)}">${escHtml(initials(t.assignee))}</span>`
+      : '';
+    barHtml = `<div class="gantt-bar ${t.status==='done'?'done':t.status==='inprogress'?'inprogress':''}"
+      data-id="${t.id}"
+      style="left:${barLeft}px;width:${barWidth}px;background:${barBg};box-shadow:${barShadow};${t.status==='done'?'opacity:0.6':''}"
+      onclick="ganttBarClick(event,'${t.id}')"
+      onmousedown="ganttDragStart(event,'move','${t.id}')">
+      <div class="gantt-resize-handle left" onmousedown="ganttDragStart(event,'left','${t.id}')"></div>
+      ${avatarHtml}
+      <span class="gantt-bar-label">${escHtml(t.title)}</span>
+      <div class="gantt-resize-handle right" onmousedown="ganttDragStart(event,'right','${t.id}')"></div>
+    </div>`;
+  }
+  const isFirst = rowIdx === 0;
+  const isLast  = rowIdx === totalRows - 1;
+  const dotHtml = showProjDot && projColor ? `<span class="gantt-proj-badge" style="background:${projColor}"></span>` : '';
+  return `<div class="gantt-row" data-id="${t.id}" draggable="true">
+    <div class="gantt-label-cell" onclick="openTaskModal('${t.id}')">
+      <div class="gantt-row-handles" onclick="event.stopPropagation()">
+        <button class="gantt-row-btn" ${isFirst?'disabled':''} onclick="moveTask('${t.id}',-1)" title="Sposta su">▲</button>
+        <button class="gantt-row-btn" ${isLast?'disabled':''} onclick="moveTask('${t.id}',1)" title="Sposta giù">▼</button>
+      </div>
+      ${dotHtml}
+      <span class="g-title ${t.status==='done'?'done':''}" style="min-width:0;overflow:hidden;text-overflow:ellipsis">${escHtml(t.title)}</span>
+    </div>
+    <div class="gantt-timeline" style="width:${totalW}px;min-width:${totalW}px">
+      <div class="gantt-daygrid" style="position:absolute;inset:0;pointer-events:none;overflow:hidden">${daygridHtml}</div>
+      ${barHtml}
+    </div>
+  </div>`;
+}
+
 function renderGantt() {
   renderFilterBar();
+  renderProjectFilterBar();
   const el = document.getElementById('view-gantt');
-  if (!state.activeProjectId) { el.innerHTML=emptyState('📊','Nessun progetto',''); return; }
+  if (state.projects.length === 0) { el.innerHTML=emptyState('<svg viewBox="0 0 24 24" fill="none" width="32" height="32" stroke="currentColor" stroke-width="1.2"><rect x="3" y="12" width="4" height="9"/><rect x="10" y="7" width="4" height="14"/><rect x="17" y="3" width="4" height="18"/></svg>','Nessun progetto',''); return; }
 
-  // Fix 4: skip tasks with empty title
-  const all = filteredSortedTasks(activeTasks()).filter(t => t.title && t.title.trim() !== '');
+  // Get all visible tasks across selected projects
+  const all = ganttVisibleTasks();
+
+  // Determine if we're in multi-project mode
+  const visibleProjectIds = _filterProjects.length > 0 ? _filterProjects : state.projects.map(p => p.id);
+  const isMultiProject = visibleProjectIds.length > 1;
 
   // Compute date range
   const tod = today();
@@ -2157,59 +2504,39 @@ function renderGantt() {
     daygridHtml += `<div style="position:absolute;top:0;bottom:0;left:${i*DAY_W}px;width:${DAY_W}px;border-right:1px solid var(--border-light);${isT?'background:rgba(91,75,232,0.06)':''}"></div>`;
   }
 
-  const bodyRowsHtml = all.map((t, rowIdx) => {
-    // Bar geometry
-    let barHtml = '';
-    if (t.start || t.due) {
-      const s = t.start || t.due, e = t.due || t.start;
-      const offsetDays = daysBetween(startD, s);
-      const spanDays   = Math.max(1, daysBetween(s, e) + 1);
-      const barLeft    = offsetDays * DAY_W + 2;
-      const barWidth   = spanDays * DAY_W - 4;
-      const tp = getTaskType(t.type || '');
-      let barBg, barShadow;
-      if (tp) {
-        barBg = `linear-gradient(135deg,${tp.color}dd,${tp.color})`;
-        barShadow = `0 2px 8px ${tp.color}55`;
-      } else if (t.status === 'done') {
-        barBg = 'linear-gradient(135deg,#c8c4be,#b0aca6)'; barShadow = 'none';
-      } else if (t.status === 'inprogress') {
-        barBg = 'linear-gradient(135deg,#e09000,var(--inprogress-color))'; barShadow = '0 2px 8px rgba(192,120,0,0.25)';
-      } else {
-        barBg = 'linear-gradient(135deg,var(--accent),#7b68f0)'; barShadow = '0 2px 8px rgba(91,75,232,0.28)';
-      }
-      // Fix 4: avatar dot with assignee initial
-      const avatarHtml = t.assignee
-        ? `<span class="gantt-bar-avatar" style="background:${avatarColor(t.assignee)}">${escHtml(initials(t.assignee))}</span>`
-        : '';
-      barHtml = `<div class="gantt-bar ${t.status==='done'?'done':t.status==='inprogress'?'inprogress':''}"
-        data-id="${t.id}"
-        style="left:${barLeft}px;width:${barWidth}px;background:${barBg};box-shadow:${barShadow};${t.status==='done'?'opacity:0.6':''}"
-        onclick="ganttBarClick(event,'${t.id}')"
-        onmousedown="ganttDragStart(event,'move','${t.id}')">
-        <div class="gantt-resize-handle left" onmousedown="ganttDragStart(event,'left','${t.id}')"></div>
-        ${avatarHtml}
-        <span class="gantt-bar-label">${escHtml(t.title)}</span>
-        <div class="gantt-resize-handle right" onmousedown="ganttDragStart(event,'right','${t.id}')"></div>
-      </div>`;
-    }
+  // Build body rows — grouped by project when multi-project mode
+  let bodyRowsHtml = '';
+  let globalRowIdx = 0;
+  const totalRows = all.length;
 
-    const isFirst = rowIdx === 0;
-    const isLast  = rowIdx === all.length - 1;
-    return `<div class="gantt-row" data-id="${t.id}" draggable="true">
-      <div class="gantt-label-cell" onclick="openTaskModal('${t.id}')">
-        <div class="gantt-row-handles" onclick="event.stopPropagation()">
-          <button class="gantt-row-btn" ${isFirst?'disabled':''} onclick="moveTask('${t.id}',-1)" title="Sposta su">▲</button>
-          <button class="gantt-row-btn" ${isLast?'disabled':''} onclick="moveTask('${t.id}',1)" title="Sposta giù">▼</button>
+  if (isMultiProject) {
+    // Group tasks by project, preserving project order
+    visibleProjectIds.forEach(projId => {
+      const proj = state.projects.find(p => p.id === projId);
+      if (!proj) return;
+      const projTasks = all.filter(t => t.projectId === projId);
+      if (projTasks.length === 0) return;
+      const col = projectColor(projId);
+      // Section header
+      bodyRowsHtml += `<div style="display:flex;flex-direction:row;height:28px;background:${col}12;border-bottom:1px solid ${col}30;flex-shrink:0;position:sticky;left:0;z-index:4">
+        <div style="display:flex;align-items:center;gap:7px;padding:0 12px;font-size:10px;font-weight:700;color:${col};letter-spacing:0.06em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:${labelW}px;min-width:${labelW}px;border-right:1px solid ${col}30;flex-shrink:0">
+          <span style="width:8px;height:8px;border-radius:50%;background:${col};flex-shrink:0"></span>${escHtml(proj.name)}
         </div>
-        <span class="g-title ${t.status==='done'?'done':''}">${escHtml(t.title)}</span>
-      </div>
-      <div class="gantt-timeline" style="width:${totalW}px;min-width:${totalW}px">
-        <div class="gantt-daygrid" style="position:absolute;inset:0;pointer-events:none;overflow:hidden">${daygridHtml}</div>
-        ${barHtml}
-      </div>
-    </div>`;
-  }).join('');
+        <div style="width:${totalW}px;min-width:${totalW}px;position:relative">
+          <div style="position:absolute;inset:0;pointer-events:none;overflow:hidden">${daygridHtml}</div>
+        </div>
+      </div>`;
+      projTasks.forEach(t => {
+        const rowIdx = globalRowIdx++;
+        bodyRowsHtml += ganttRowHtml(t, rowIdx, totalRows, labelW, totalW, startD, daygridHtml, true, col);
+      });
+    });
+  } else {
+    all.forEach((t, rowIdx) => {
+      globalRowIdx++;
+      bodyRowsHtml += ganttRowHtml(t, rowIdx, totalRows, labelW, totalW, startD, daygridHtml, false, null);
+    });
+  }
 
   el.innerHTML = `
     <div class="gantt-header-wrap" style="display:flex;flex-shrink:0;background:var(--surface2);border-bottom:1px solid var(--border);overflow:hidden" id="gantt-head-outer">
@@ -2584,15 +2911,221 @@ function deleteCurrentTask(){if(!editingTaskId)return;state.tasks=state.tasks.fi
 function createTask(title='',status='todo'){const t={id:uid(),projectId:state.activeProjectId,title,description:'',status,assignee:'',type:'',start:'',due:''};state.tasks.push(t);save();return t.id;}
 
 // ── PROJECT MODAL ──
-function openProjectModal(){document.getElementById('project-name-input').value='';document.getElementById('project-modal-overlay').style.display='flex';setTimeout(()=>document.getElementById('project-name-input').focus(),100);}
+function openProjectModal(){
+  document.getElementById('project-name-input').value='';
+  document.getElementById('project-owner-input').value='';
+  document.getElementById('project-modal-overlay').style.display='flex';
+  setTimeout(()=>document.getElementById('project-name-input').focus(),100);
+}
 function closeProjectModal(){document.getElementById('project-modal-overlay').style.display='none';}
 function handleProjectOverlayClick(e){if(e.target===document.getElementById('project-modal-overlay'))closeProjectModal();}
 function saveProject(){
   const name=document.getElementById('project-name-input').value.trim();
   if (!name){document.getElementById('project-name-input').focus();return;}
-  const p={id:uid(),name};
+  const owner=document.getElementById('project-owner-input').value.trim();
+  const p={id:uid(),name,owner:owner||'',projectStatus:''};
   state.projects.push(p);state.activeProjectId=p.id;
   save();closeProjectModal();updateHeader();renderCurrentView();updateBoardBadge();
+}
+
+// ── TABLE VIEW ──
+const DEFAULT_PROJECT_STATUSES = ['On Track','At Risk','Off Track','In Attesa','Completato'];
+
+function getProjectStatuses() {
+  if (!state.projectStatuses || !state.projectStatuses.length) return DEFAULT_PROJECT_STATUSES;
+  return state.projectStatuses;
+}
+
+function getNextStep(projectId) {
+  const tasks = state.tasks.filter(t => t.projectId === projectId && t.status !== 'done');
+  if (!tasks.length) return null;
+  const withDate = tasks.filter(t => t.due || t.start).sort((a,b)=>{
+    const da = a.due||a.start, db = b.due||b.start;
+    return da<db?-1:da>db?1:0;
+  });
+  const noDate = tasks.filter(t => !t.due && !t.start);
+  return [...withDate,...noDate][0] || null;
+}
+
+const STATUS_COLORS_MAP = {'On Track':'#1a8f4a','At Risk':'#c07800','Off Track':'#d93025','In Attesa':'#5b4be8','Completato':'#7a7570'};
+let _tblStatusDropdownPid = null;
+
+function renderTable() {
+  const el = document.getElementById('view-table');
+  const projs = state.projects;
+  if (!projs.length) {
+    el.innerHTML = `<div class="table-empty">Nessun progetto. Creane uno per iniziare.</div>`;
+    return;
+  }
+  const statuses = getProjectStatuses();
+
+  const rows = projs.map(p => {
+    const next = getNextStep(p.id);
+    const isActive = p.id === state.activeProjectId;
+    const selStatus = p.projectStatus || '';
+    const ownerName = p.owner || '';
+
+    // owner cell
+    const ownerHtml = ownerName
+      ? `<div class="table-owner"><div class="avatar-sm" style="background:${avatarColor(ownerName)};width:22px;height:22px;font-size:8px">${escHtml(initials(ownerName))}</div>${escHtml(ownerName)}</div>`
+      : `<span style="color:var(--text-faint);font-size:12px">—</span>`;
+
+    // status pill
+    let statusHtml;
+    if (selStatus) {
+      const col = STATUS_COLORS_MAP[selStatus] || '#9c988f';
+      statusHtml = `<span class="tbl-status-pill" style="color:${col};background:${col}14;border-color:${col}33"
+        onclick="event.stopPropagation();openTblStatusPicker('${p.id}',this)">
+        <span style="width:7px;height:7px;border-radius:50%;background:${col};flex-shrink:0"></span>
+        ${escHtml(selStatus)}
+        <svg viewBox="0 0 10 6" width="8" height="8" fill="none" stroke="currentColor" stroke-width="1.4" style="opacity:.5;flex-shrink:0"><path d="M1 1l4 4 4-4"/></svg>
+      </span>`;
+    } else {
+      statusHtml = `<span class="tbl-status-empty" onclick="event.stopPropagation();openTblStatusPicker('${p.id}',this)">
+        — imposta
+        <svg viewBox="0 0 10 6" width="8" height="8" fill="none" stroke="currentColor" stroke-width="1.4" style="opacity:.5;flex-shrink:0"><path d="M1 1l4 4 4-4"/></svg>
+      </span>`;
+    }
+
+    // stats bar
+    const projTasks = state.tasks.filter(t => t.projectId === p.id);
+    const total = projTasks.length;
+    const done  = projTasks.filter(t => t.status === 'done').length;
+    const inProg = projTasks.filter(t => t.status === 'inprogress').length;
+    const pct = total > 0 ? Math.round(done / total * 100) : 0;
+    const barColor = pct === 100 ? '#1a8f4a' : inProg > 0 ? '#c07800' : '#5b4be8';
+    const statsHtml = total > 0
+      ? `<div class="tbl-stats">
+          <div class="tbl-stats-bar"><div class="tbl-stats-bar-fill" style="width:${pct}%;background:${barColor}"></div></div>
+          <span class="tbl-stats-nums"><strong>${done}</strong>/${total}</span>
+        </div>`
+      : `<span style="color:var(--text-faint);font-size:12px">—</span>`;
+
+    // next step cell
+    let nextHtml = `<span style="color:var(--text-faint);font-size:12px">—</span>`;
+    if (next) {
+      const overdue = next.due && isOverdue(next.due);
+      nextHtml = `<div class="next-step-cell">
+        <span class="next-step-text">${escHtml(next.title)}</span>
+        ${next.due ? `<span class="due-tag ${overdue?'overdue':''}">${fmtDate(next.due)}</span>` : ''}
+        ${next.assignee ? `<div class="avatar-sm" style="background:${avatarColor(next.assignee)};width:18px;height:18px;font-size:7px;flex-shrink:0">${escHtml(initials(next.assignee))}</div>` : ''}
+      </div>`;
+    }
+
+    return `<tr class="${isActive?'active-proj':''}" onclick="selectProjectFromTable('${p.id}',event)">
+      <td class="col-name">
+        <div class="tbl-name-cell">
+          <div class="tbl-name-dot" style="background:${projectColor(p.id)}"></div>
+          <span class="tbl-name-text">${escHtml(p.name)}</span>
+          ${isActive ? `<span class="tbl-active-badge">attivo</span>` : ''}
+        </div>
+      </td>
+      <td class="col-owner">${ownerHtml}</td>
+      <td class="col-status" onclick="event.stopPropagation()">${statusHtml}</td>
+      <td class="col-stats">${statsHtml}</td>
+      <td class="col-next">${nextHtml}</td>
+    </tr>`;
+  }).join('');
+
+  const statusManagerHtml = `<div class="tbl-status-manager">
+    <span class="tbl-status-manager-label">Stati progetto:</span>
+    ${getProjectStatuses().map((s,i) => {
+      const col = STATUS_COLORS_MAP[s] || '#9c988f';
+      return `<span style="display:inline-flex;align-items:center;gap:5px;background:${col}12;border:1px solid ${col}33;border-radius:var(--radius-pill);padding:4px 10px;font-size:11px;font-family:var(--sans);font-weight:500;color:${col}">
+        <span style="width:6px;height:6px;border-radius:50%;background:${col}"></span>
+        ${escHtml(s)}
+        <button onclick="removeProjectStatus(${i})" style="background:none;border:none;cursor:pointer;color:${col};opacity:.6;font-size:14px;line-height:1;padding:0;margin-left:1px" title="Rimuovi">×</button>
+      </span>`;
+    }).join('')}
+    <button onclick="promptAddProjectStatus()" style="background:var(--accent-dim);border:1.5px dashed var(--accent-border);border-radius:var(--radius-pill);padding:4px 12px;font-size:11px;font-family:var(--sans);font-weight:600;color:var(--accent);cursor:pointer;transition:all .14s">+ Stato</button>
+  </div>`;
+
+  el.innerHTML = `<div class="table-wrap">
+    <div class="table-toolbar">
+      <span class="table-toolbar-title">Progetti <span style="color:var(--text-faint);font-weight:400;font-size:13px">(${projs.length})</span></span>
+      <div class="table-toolbar-right">
+        <button onclick="openProjectModal()" style="display:inline-flex;align-items:center;gap:6px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-pill);padding:7px 16px;font-family:var(--sans);font-size:12px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(91,75,232,.25);transition:opacity .14s" onmouseenter="this.style.opacity='.85'" onmouseleave="this.style.opacity='1'">
+          <svg viewBox="0 0 12 12" fill="none" width="10" height="10" stroke="currentColor" stroke-width="2"><path d="M6 1v10M1 6h10"/></svg>
+          Nuovo progetto
+        </button>
+      </div>
+    </div>
+    <table class="proj-table">
+      <thead><tr>
+        <th class="col-name">Nome</th>
+        <th class="col-owner">Owner</th>
+        <th class="col-status">Stato</th>
+        <th class="col-stats">Avanzamento</th>
+        <th class="col-next">Prossimo step</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    ${statusManagerHtml}
+  </div>
+  <!-- status dropdown -->
+  <div id="tbl-status-dd" class="tbl-status-dropdown"></div>`;
+
+  // close dropdown on outside click
+  setTimeout(() => {
+    document.addEventListener('click', _closeTblStatusDropdown, {once:true, capture:true});
+  }, 0);
+}
+
+function openTblStatusPicker(projectId, anchorEl) {
+  _tblStatusDropdownPid = projectId;
+  const dd = document.getElementById('tbl-status-dd');
+  if (!dd) return;
+  const statuses = getProjectStatuses();
+  const rect = anchorEl.getBoundingClientRect();
+  dd.innerHTML = [
+    {label:'— Rimuovi stato —', value:'', color:'#9c988f'},
+    ...statuses.map(s => ({label:s, value:s, color:STATUS_COLORS_MAP[s]||'#9c988f'}))
+  ].map(opt => `<div class="tbl-status-opt" onclick="pickTblStatus('${escHtml(opt.value)}')">
+    <span class="tbl-status-opt-dot" style="background:${opt.color}"></span>
+    <span style="color:${opt.value ? opt.color : 'var(--text-faint)'};font-size:12px">${escHtml(opt.label)}</span>
+  </div>`).join('');
+  dd.style.top  = (rect.bottom + 6) + 'px';
+  dd.style.left = rect.left + 'px';
+  dd.classList.add('open');
+  // reposition if off-screen right
+  const ddRect = dd.getBoundingClientRect();
+  if (ddRect.right > window.innerWidth - 10) dd.style.left = (window.innerWidth - ddRect.width - 10) + 'px';
+}
+
+function _closeTblStatusDropdown() {
+  const dd = document.getElementById('tbl-status-dd');
+  if (dd) dd.classList.remove('open');
+}
+
+function pickTblStatus(value) {
+  if (!_tblStatusDropdownPid) return;
+  _closeTblStatusDropdown();
+  const proj = state.projects.find(p => p.id === _tblStatusDropdownPid);
+  if (proj) { proj.projectStatus = value; save(); renderTable(); }
+  _tblStatusDropdownPid = null;
+}
+
+function setProjectStatus(projectId, status) {
+  const proj = state.projects.find(p=>p.id===projectId);
+  if (proj) { proj.projectStatus=status; save(); renderTable(); }
+}
+
+function selectProjectFromTable(id) {
+  selectProject(id);
+  renderTable();
+}
+
+function removeProjectStatus(idx) {
+  if (!state.projectStatuses) state.projectStatuses = [...DEFAULT_PROJECT_STATUSES];
+  state.projectStatuses.splice(idx,1);
+  save(); renderTable();
+}
+
+function promptAddProjectStatus() {
+  const name = prompt('Nome nuovo stato:');
+  if (!name || !name.trim()) return;
+  if (!state.projectStatuses) state.projectStatuses = [...DEFAULT_PROJECT_STATUSES];
+  if (!state.projectStatuses.includes(name.trim())) { state.projectStatuses.push(name.trim()); save(); renderTable(); }
 }
 
 // ── CONFIRM ──
@@ -2612,7 +3145,7 @@ function resetAllData(){
 
 // ── CONTEXT MENU ──
 let ctxMenu=null;
-function showCtxMenu(e,projectId){closeCtxMenu();const menu=document.createElement('div');menu.className='ctx-menu';menu.style.left=e.clientX+'px';menu.style.top=e.clientY+'px';menu.innerHTML=`<div class="ctx-item" onclick="closeCtxMenu();confirmDeleteProject('${projectId}')">🗑 Elimina progetto</div>`;document.body.appendChild(menu);ctxMenu=menu;setTimeout(()=>document.addEventListener('click',closeCtxMenu,{once:true}),0);}
+function showCtxMenu(e,projectId){closeCtxMenu();const menu=document.createElement('div');menu.className='ctx-menu';menu.style.left=e.clientX+'px';menu.style.top=e.clientY+'px';menu.innerHTML=`<div class="ctx-item" onclick="closeCtxMenu();confirmDeleteProject('${projectId}')"><svg viewBox="0 0 16 16" fill="none" width="13" height="13" stroke="currentColor" stroke-width="1.5" style="flex-shrink:0"><path d="M3 4h10M6 4V2h4v2M5 4v9h6V4"/></svg> Elimina progetto</div>`;document.body.appendChild(menu);ctxMenu=menu;setTimeout(()=>document.addEventListener('click',closeCtxMenu,{once:true}),0);}
 function closeCtxMenu(){if(ctxMenu){ctxMenu.remove();ctxMenu=null;}}
 
 // ── KEYBOARD ──
@@ -2647,7 +3180,7 @@ function renderSettingsPanel() {
       <div class="settings-item">
         <div class="avatar-sm" style="background:${avatarColor(u)};width:28px;height:28px;font-size:10px;flex-shrink:0">${escHtml(initials(u))}</div>
         <span class="settings-item-label">${escHtml(u)}</span>
-        <button class="settings-remove-btn" onclick="removeUser(${i})">✕</button>
+        <button class="settings-remove-btn" onclick="removeUser(${i})"><svg viewBox="0 0 12 12" fill="none" width="11" height="11" stroke="currentColor" stroke-width="1.8"><path d="M2 2l8 8M10 2l-8 8"/></svg></button>
       </div>`).join('');
   }
 
@@ -2661,7 +3194,7 @@ function renderSettingsPanel() {
       <div class="settings-item">
         <div style="width:14px;height:14px;border-radius:50%;background:${tp.color};flex-shrink:0"></div>
         <span class="settings-item-label">${escHtml(tp.name)}</span>
-        <button class="settings-remove-btn" onclick="removeTaskType(${i})">✕</button>
+        <button class="settings-remove-btn" onclick="removeTaskType(${i})"><svg viewBox="0 0 12 12" fill="none" width="11" height="11" stroke="currentColor" stroke-width="1.8"><path d="M2 2l8 8M10 2l-8 8"/></svg></button>
       </div>`).join('');
   }
 }
@@ -2778,6 +3311,49 @@ function setAssigneeFilter(name) {
   _filterAssignee = name;
   renderCurrentView();
   renderFilterBar();
+}
+
+// ── PROJECT FILTER (gantt) ──
+function renderProjectFilterBar() {
+  const bar = document.getElementById('project-chips');
+  if (!bar) return;
+  const allActive = _filterProjects.length === 0; // empty = tutti
+  let html = `<div class="proj-filter-chip ${allActive ? 'active' : ''}" style="${allActive ? 'background:var(--accent);' : ''}" onclick="setProjectFilter([])">Tutti</div>`;
+  state.projects.forEach(p => {
+    const col = projectColor(p.id);
+    const sel = _filterProjects.includes(p.id);
+    html += `<div class="proj-filter-chip ${sel ? 'active' : ''}"
+      style="${sel ? `background:${col};border-color:${col};` : ''}"
+      onclick="toggleProjectFilter('${p.id}')">
+      <span style="width:7px;height:7px;border-radius:50%;background:${sel ? 'rgba(255,255,255,0.7)' : col};display:inline-block;flex-shrink:0"></span>
+      ${escHtml(p.name)}
+    </div>`;
+  });
+  bar.innerHTML = html;
+}
+
+function toggleProjectFilter(id) {
+  if (_filterProjects.includes(id)) {
+    _filterProjects = _filterProjects.filter(x => x !== id);
+  } else {
+    _filterProjects = [..._filterProjects, id];
+  }
+  renderProjectFilterBar();
+  renderGantt();
+}
+
+function setProjectFilter(ids) {
+  _filterProjects = ids;
+  renderProjectFilterBar();
+  renderGantt();
+}
+
+// Returns tasks for gantt: respects project filter + assignee filter
+function ganttVisibleTasks() {
+  const projectIds = _filterProjects.length > 0 ? _filterProjects : state.projects.map(p => p.id);
+  let tasks = state.tasks.filter(t => projectIds.includes(t.projectId) && t.title && t.title.trim() !== '');
+  if (_filterAssignee) tasks = tasks.filter(t => t.assignee === _filterAssignee);
+  return tasks;
 }
 
 function applySortFilter() {
