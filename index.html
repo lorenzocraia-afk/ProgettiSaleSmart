@@ -2318,7 +2318,7 @@ function save() {
     } finally {
       _saveTimer = null;
       // Aspetta che l'SSE rimbalzi il nostro stesso evento prima di riabilitare
-      setTimeout(()=>{ _ignoreSse = false; }, 3000);
+      setTimeout(()=>{ _ignoreSse = false; }, 1500);
     }
   }, 600);
 }
@@ -2329,9 +2329,8 @@ let _rtdbAvailable = false;
 async function load() {
   showSync('↻', 'Caricamento...', 'neutral');
 
-  // Timeout di sicurezza: se Firebase non risponde in 5s, vai subito a localStorage
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 5000);
+  const timeout = setTimeout(() => controller.abort(), 6000);
 
   try {
     const res = await fetch(RTDB_NODE, { signal: controller.signal });
@@ -2341,29 +2340,20 @@ async function load() {
     _rtdbAvailable = true;
 
     if (remote && typeof remote === 'object' && remote.projects && remote.tasks) {
-      // Confronta timestamp: usa il più recente tra Firebase e localStorage
-      const lsRaw = localStorage.getItem('flow_v3_p2');
-      let lsState = null;
-      try { lsState = lsRaw ? JSON.parse(lsRaw) : null; } catch(_) {}
-      const remoteTs = remote._ts || 0;
-      const localTs  = lsState?._ts || 0;
-      if (localTs > remoteTs && lsState?.projects?.length) {
-        _applyState(lsState, false);
-        save(); // risincronizza Firebase con i dati locali più recenti
-      } else {
-        _applyState(remote, true);
-      }
+      // Firebase è la fonte di verità — carica sempre da Firebase
+      _applyState(remote, true);
       showSync('✓', '', 'ok');
       return;
     } else {
+      // Firebase raggiungibile ma vuoto — usa localStorage
       _tryLoadLocalStorage();
       showSync('✓', '', 'ok');
     }
   } catch(e) {
     clearTimeout(timeout);
     _rtdbAvailable = false;
+    // Firebase non raggiungibile — fallback a localStorage
     _tryLoadLocalStorage();
-    // Mostra offline solo brevemente, poi sparisce
     showSync('– Offline', '', 'neutral');
     setTimeout(()=>{ const el=document.getElementById('sync-indicator'); if(el) el.style.opacity='0'; }, 2000);
   }
@@ -2420,13 +2410,9 @@ function startRealtimeSync() {
     try {
       const msg = JSON.parse(e.data);
       if (msg.path === '/' && msg.data?.projects && msg.data?.tasks) {
-        const remoteTs = msg.data._ts || 0;
-        const localTs  = state._ts   || 0;
-        // Ignora solo se i dati locali sono STRETTAMENTE più recenti
-        // (stesso ts = altro terminale ha caricato i nostri stessi dati → ignora)
-        if (remoteTs > 0 && remoteTs < localTs) return;
         const prevActive = state.activeProjectId;
         const prevView   = state.currentView;
+        // Aggiorna solo se i dati sono effettivamente cambiati
         const before = JSON.stringify({p:state.projects, t:state.tasks});
         const after  = JSON.stringify({p:msg.data.projects, t:msg.data.tasks});
         if (before === after) return;
