@@ -592,7 +592,7 @@ body {
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 2.5px;
-  background: var(--card-proj-color, var(--border));
+  background: var(--card-type-color, var(--border));
   border-radius: var(--radius) var(--radius) 0 0;
 }
 
@@ -2915,12 +2915,12 @@ function renderBoard() {
 function cardHtml(t) {
   const overdue = t.due && isOverdue(t.due) && t.status!=='done';
   const tp = getTaskType(t.type||'');
-  const projCol = projectColor(t.projectId);
+  const typeCol = tp ? tp.color : 'var(--border)';
   const sameStatus = filteredSortedTasks(tasksByStatus(t.status));
   const idx = sameStatus.findIndex(x=>x.id===t.id);
   const isFirst = idx === 0;
   const isLast = idx === sameStatus.length - 1;
-  return `<div class="board-card" data-id="${t.id}" style="--card-proj-color:${projCol}">
+  return `<div class="board-card" data-id="${t.id}" style="--card-type-color:${typeCol}">
     ${tp?`<div style="margin-bottom:6px"><span class="type-badge" style="background:${tp.color}18;color:${tp.color};border:1px solid ${tp.color}30">${escHtml(tp.name)}</span></div>`:''}
     <div class="card-title ${t.status==='done'?'done':''}">${escHtml(t.title)}</div>
     <div class="card-footer">
