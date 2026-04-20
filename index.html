@@ -2481,18 +2481,35 @@ function openProjectsPanel() {
   overlay.style.display = 'block';
   panel.style.display = 'block';
 
-  // Desktop: anchor as popover below the button
+  // Desktop: anchor as popover, smart positioning
   if (window.innerWidth >= 600) {
     const btn = document.getElementById('project-selector-btn');
     const rect = btn.getBoundingClientRect();
-    panel.style.top  = (rect.bottom + 6) + 'px';
+    const panelH = panel.offsetHeight || 360; // estimated height
+    const spaceBelow = window.innerHeight - rect.bottom - 8;
+    const spaceAbove = rect.top - 8;
+
+    // Open upward if not enough space below
+    if (spaceBelow < panelH && spaceAbove > spaceBelow) {
+      panel.style.top  = Math.max(8, rect.top - panelH - 6) + 'px';
+    } else {
+      panel.style.top  = (rect.bottom + 6) + 'px';
+    }
     panel.style.left = rect.left + 'px';
-    // keep within viewport right edge
+
+    // Keep within viewport right edge
     requestAnimationFrame(() => {
       const pr = panel.getBoundingClientRect();
       if (pr.right > window.innerWidth - 8) {
         panel.style.left = (window.innerWidth - pr.width - 8) + 'px';
       }
+      // Recalculate vertical after actual render height is known
+      const actualH = pr.height;
+      const top = parseFloat(panel.style.top);
+      if (top + actualH > window.innerHeight - 8) {
+        panel.style.top = Math.max(8, rect.top - actualH - 6) + 'px';
+      }
+      if (parseFloat(panel.style.top) < 8) panel.style.top = '8px';
     });
   }
 }
@@ -4137,7 +4154,16 @@ function moveTaskInStatus(taskId, status, dir) {
 async function init(){
   await load();
   startRealtimeSync();
-  if (state.projects.length===0){
+  // Inserisce dati demo SOLO se nessuna fonte ha dati reali
+  // (Firebase vuoto E localStorage vuoto → primo avvio assoluto)
+  if (state.projects.length === 0 && !_rtdbAvailable) {
+    const lsRaw = localStorage.getItem('flow_v3_p2') || localStorage.getItem('flow_v3') || localStorage.getItem('flow_v2');
+    if (lsRaw) {
+      // localStorage ha dati ma _applyState non li ha caricati — riprova
+      try { const p = JSON.parse(lsRaw); if (p?.projects?.length) { _applyState(p, false); } } catch(_) {}
+    }
+  }
+  if (state.projects.length === 0){
     const p1={id:uid(),name:'Lancio prodotto'},p2={id:uid(),name:'Sito web'};
     state.projects=[p1,p2];state.activeProjectId=p1.id;
     state.users=['Federico','Stefano','Lorenzo','Giulia','Marco'];
