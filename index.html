@@ -1428,8 +1428,60 @@ input, textarea, select, button {
   color: var(--text-faint);
   font-size: 14px;
 }
-/* status picker dropdown */
-.tbl-status-dropdown {
+/* owner picker dropdown (reuse tbl-status-dropdown style) */
+.tbl-owner-dropdown {
+  position: fixed;
+  z-index: 200;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  padding: 6px;
+  min-width: 180px;
+  display: none;
+}
+.tbl-owner-dropdown.open { display: block; }
+.tbl-owner-opt {
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 10px; border-radius: 8px;
+  font-size: 12px; font-weight: 500; cursor: pointer;
+  transition: background 0.1s; color: var(--text);
+}
+.tbl-owner-opt:hover { background: var(--surface2); }
+.tbl-owner-opt.active { color: var(--accent); }
+
+/* owner cell clickable */
+.tbl-owner-cell {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 4px 8px; border-radius: 8px; cursor: pointer;
+  transition: background 0.12s; font-size: 12px; color: var(--text-muted);
+}
+.tbl-owner-cell:hover { background: var(--surface2); }
+.tbl-owner-cell-empty {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 9px; border-radius: 8px;
+  font-size: 11px; font-weight: 500; color: var(--text-faint);
+  border: 1.5px dashed var(--border); cursor: pointer; transition: all .12s;
+}
+.tbl-owner-cell-empty:hover { border-color: var(--accent); color: var(--accent); }
+
+/* inline status editor */
+.tbl-status-edit-wrap {
+  display: flex; align-items: center; gap: 6px;
+  padding: 3px 6px 3px 3px;
+  border-radius: 8px; transition: background .12s;
+}
+.tbl-status-edit-wrap:hover { background: var(--surface2); }
+.tbl-status-edit-name {
+  font-size: 11px; font-weight: 600;
+  background: none; border: none; outline: none;
+  font-family: var(--sans); cursor: text;
+  padding: 0; min-width: 60px; max-width: 120px;
+}
+.tbl-status-edit-name:focus {
+  background: var(--surface3); border-radius: 4px; padding: 1px 4px;
+}
+
   position: fixed;
   z-index: 200;
   background: var(--surface);
@@ -2965,10 +3017,14 @@ function renderTable() {
     const selStatus = p.projectStatus || '';
     const ownerName = p.owner || '';
 
-    // owner cell
+    // owner cell — clickable
     const ownerHtml = ownerName
-      ? `<div class="table-owner"><div class="avatar-sm" style="background:${avatarColor(ownerName)};width:22px;height:22px;font-size:8px">${escHtml(initials(ownerName))}</div>${escHtml(ownerName)}</div>`
-      : `<span style="color:var(--text-faint);font-size:12px">—</span>`;
+      ? `<div class="tbl-owner-cell" onclick="event.stopPropagation();openTblOwnerPicker('${p.id}',this)" title="Cambia owner">
+          <div class="avatar-sm" style="background:${avatarColor(ownerName)};width:22px;height:22px;font-size:8px">${escHtml(initials(ownerName))}</div>
+          ${escHtml(ownerName)}
+          <svg viewBox="0 0 10 6" width="7" height="7" fill="none" stroke="currentColor" stroke-width="1.4" style="opacity:.4;flex-shrink:0"><path d="M1 1l4 4 4-4"/></svg>
+        </div>`
+      : `<span class="tbl-owner-cell-empty" onclick="event.stopPropagation();openTblOwnerPicker('${p.id}',this)">+ owner</span>`;
 
     // status pill
     let statusHtml;
@@ -3031,13 +3087,24 @@ function renderTable() {
     <span class="tbl-status-manager-label">Stati progetto:</span>
     ${getProjectStatuses().map((s,i) => {
       const col = STATUS_COLORS_MAP[s] || '#9c988f';
-      return `<span style="display:inline-flex;align-items:center;gap:5px;background:${col}12;border:1px solid ${col}33;border-radius:var(--radius-pill);padding:4px 10px;font-size:11px;font-family:var(--sans);font-weight:500;color:${col}">
-        <span style="width:6px;height:6px;border-radius:50%;background:${col}"></span>
-        ${escHtml(s)}
-        <button onclick="removeProjectStatus(${i})" style="background:none;border:none;cursor:pointer;color:${col};opacity:.6;font-size:14px;line-height:1;padding:0;margin-left:1px" title="Rimuovi">×</button>
+      return `<span style="display:inline-flex;align-items:center;gap:5px;background:${col}12;border:1.5px solid ${col}33;border-radius:var(--radius-pill);padding:3px 6px 3px 10px;font-family:var(--sans)">
+        <span style="width:6px;height:6px;border-radius:50%;background:${col};flex-shrink:0"></span>
+        <input class="tbl-status-edit-name" value="${escHtml(s)}" style="color:${col}" 
+          title="Rinomina stato"
+          onblur="renameProjStatus(${i},this.value)"
+          onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape'){this.value=this.dataset.orig;this.blur();}"
+          onfocus="this.dataset.orig=this.value"
+          onclick="event.stopPropagation()">
+        <button onclick="removeProjectStatus(${i})" style="background:none;border:none;cursor:pointer;color:${col};opacity:.5;font-size:16px;line-height:1;padding:0 2px;margin:0;transition:opacity .12s" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='.5'" title="Rimuovi">×</button>
       </span>`;
     }).join('')}
-    <button onclick="promptAddProjectStatus()" style="background:var(--accent-dim);border:1.5px dashed var(--accent-border);border-radius:var(--radius-pill);padding:4px 12px;font-size:11px;font-family:var(--sans);font-weight:600;color:var(--accent);cursor:pointer;transition:all .14s">+ Stato</button>
+    <span id="tbl-add-status-wrap" style="display:inline-flex;align-items:center;gap:0">
+      <input id="tbl-new-status-input" placeholder="+ nuovo stato"
+        style="background:none;border:none;outline:none;font-family:var(--sans);font-size:11px;font-weight:600;color:var(--accent);width:100px;cursor:pointer;padding:4px 6px;border-radius:var(--radius-pill);transition:background .12s"
+        onfocus="this.style.background='var(--accent-dim)';this.style.cursor='text';this.style.width='130px'"
+        onblur="addProjectStatusInline(this)"
+        onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape')this.blur()">
+    </span>
   </div>`;
 
   el.innerHTML = `<div class="table-wrap">
@@ -3063,7 +3130,9 @@ function renderTable() {
     ${statusManagerHtml}
   </div>
   <!-- status dropdown -->
-  <div id="tbl-status-dd" class="tbl-status-dropdown"></div>`;
+  <div id="tbl-status-dd" class="tbl-status-dropdown"></div>
+  <!-- owner dropdown -->
+  <div id="tbl-owner-dd" class="tbl-owner-dropdown"></div>`;
 
   // close dropdown on outside click
   setTimeout(() => {
@@ -3105,6 +3174,76 @@ function pickTblStatus(value) {
   _tblStatusDropdownPid = null;
 }
 
+// ── OWNER PICKER ──
+let _tblOwnerDropdownPid = null;
+
+function openTblOwnerPicker(projectId, anchorEl) {
+  _tblOwnerDropdownPid = projectId;
+  const dd = document.getElementById('tbl-owner-dd');
+  if (!dd) return;
+  const proj = state.projects.find(p => p.id === projectId);
+  const curOwner = proj?.owner || '';
+  const users = getAssignees();
+  const rect = anchorEl.getBoundingClientRect();
+
+  dd.innerHTML = [
+    {name:'— Nessun owner —', value:''},
+    ...users.map(u => ({name:u, value:u}))
+  ].map(opt => `<div class="tbl-owner-opt ${opt.value===curOwner?'active':''}" onclick="pickTblOwner('${escHtml(opt.value)}')">
+    ${opt.value
+      ? `<div class="avatar-sm" style="background:${avatarColor(opt.value)};width:24px;height:24px;font-size:9px;flex-shrink:0">${escHtml(initials(opt.value))}</div>`
+      : `<span style="width:24px;height:24px;display:flex;align-items:center;justify-content:center;color:var(--text-faint);font-size:14px;flex-shrink:0">×</span>`}
+    <span>${escHtml(opt.name)}</span>
+    ${opt.value === curOwner ? `<svg viewBox="0 0 12 10" width="12" height="12" fill="none" stroke="var(--accent)" stroke-width="2" style="margin-left:auto"><path d="M1 5l3 4 7-8"/></svg>` : ''}
+  </div>`).join('');
+
+  dd.style.top  = (rect.bottom + 6) + 'px';
+  dd.style.left = rect.left + 'px';
+  dd.classList.add('open');
+  const ddRect = dd.getBoundingClientRect();
+  if (ddRect.right > window.innerWidth - 10) dd.style.left = (window.innerWidth - ddRect.width - 10) + 'px';
+  if (ddRect.bottom > window.innerHeight - 10) dd.style.top = (rect.top - ddRect.height - 6) + 'px';
+
+  setTimeout(() => document.addEventListener('click', _closeTblOwnerDropdown, {once:true, capture:true}), 0);
+}
+
+function _closeTblOwnerDropdown() {
+  const dd = document.getElementById('tbl-owner-dd');
+  if (dd) dd.classList.remove('open');
+}
+
+function pickTblOwner(value) {
+  if (!_tblOwnerDropdownPid) return;
+  _closeTblOwnerDropdown();
+  const proj = state.projects.find(p => p.id === _tblOwnerDropdownPid);
+  if (proj) { proj.owner = value; save(); renderTable(); }
+  _tblOwnerDropdownPid = null;
+}
+
+// ── INLINE STATUS MANAGEMENT ──
+function renameProjStatus(idx, newName) {
+  const trimmed = newName.trim();
+  if (!trimmed) { renderTable(); return; }
+  if (!state.projectStatuses || !state.projectStatuses.length) state.projectStatuses = [...DEFAULT_PROJECT_STATUSES];
+  const old = state.projectStatuses[idx];
+  if (!old || old === trimmed) return;
+  state.projectStatuses[idx] = trimmed;
+  // update any project using the old name
+  state.projects.forEach(p => { if (p.projectStatus === old) p.projectStatus = trimmed; });
+  save(); renderTable();
+}
+
+function addProjectStatusInline(input) {
+  const name = input.value.trim();
+  input.value = '';
+  input.style.background = '';
+  input.style.width = '100px';
+  input.style.cursor = 'pointer';
+  if (!name) return;
+  if (!state.projectStatuses) state.projectStatuses = [...DEFAULT_PROJECT_STATUSES];
+  if (!state.projectStatuses.includes(name)) { state.projectStatuses.push(name); save(); renderTable(); }
+}
+
 function setProjectStatus(projectId, status) {
   const proj = state.projects.find(p=>p.id===projectId);
   if (proj) { proj.projectStatus=status; save(); renderTable(); }
@@ -3122,6 +3261,7 @@ function removeProjectStatus(idx) {
 }
 
 function promptAddProjectStatus() {
+  // Legacy — replaced by inline input in status manager strip
   const name = prompt('Nome nuovo stato:');
   if (!name || !name.trim()) return;
   if (!state.projectStatuses) state.projectStatuses = [...DEFAULT_PROJECT_STATUSES];
@@ -3150,7 +3290,7 @@ function closeCtxMenu(){if(ctxMenu){ctxMenu.remove();ctxMenu=null;}}
 
 // ── KEYBOARD ──
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){closeTaskModal();closeProjectModal();closeRenameProject();closeConfirm();closeCtxMenu();closeStatusPicker();closeAssigneePicker();dpDismiss();closeProjectsPanel();closeSettingsPanel();closeTypePicker();}
+  if(e.key==='Escape'){closeTaskModal();closeProjectModal();closeRenameProject();closeConfirm();closeCtxMenu();closeStatusPicker();closeAssigneePicker();dpDismiss();closeProjectsPanel();closeSettingsPanel();closeTypePicker();_closeTblStatusDropdown();_closeTblOwnerDropdown();}
   if((e.metaKey||e.ctrlKey)&&e.key==='Enter'){if(document.getElementById('task-modal-overlay').style.display==='flex')saveTask();if(document.getElementById('project-modal-overlay').style.display==='flex')saveProject();if(document.getElementById('rename-project-overlay').style.display==='flex')saveRenameProject();}
 });
 
