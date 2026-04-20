@@ -1,0 +1,2954 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Ehivents</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+:root {
+  /* ── Light palette ── */
+  --bg:           #f5f4f0;          /* warm off-white page */
+  --surface:      #ffffff;          /* card / panel */
+  --surface2:     #f0eeea;          /* inset fields, secondary bg */
+  --surface3:     #e8e5e0;          /* hover, pressed */
+  --border:       #dddad4;          /* standard border */
+  --border-light: #eae7e2;          /* subtle separator */
+  --text:         #1a1814;          /* near-black body */
+  --text-muted:   #5a5650;          /* secondary text */
+  --text-faint:   #9c988f;          /* placeholder, disabled */
+  --accent:       #5b4be8;          /* primary violet */
+  --accent-dim:   rgba(91,75,232,0.10);
+  --accent-border:rgba(91,75,232,0.25);
+  --todo-color:   #3b67e8;          /* blue */
+  --todo-bg:      rgba(59,103,232,0.08);
+  --inprogress-color: #c07800;      /* amber – readable on white */
+  --inprogress-bg:    rgba(192,120,0,0.08);
+  --done-color:   #7a7570;          /* muted grey */
+  --done-bg:      rgba(122,117,112,0.10);
+  --danger:       #d93025;          /* red */
+  --safe:         #1a8f4a;          /* green */
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-pill: 999px;
+  --sans: 'Sora', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+  --nav-h: 64px;
+  --header-h: 60px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+html {
+  height: 100%;
+  overflow-x: hidden;  /* block horizontal bleed at root */
+  background: var(--bg);
+}
+body {
+  min-height: 100%;
+  width: 100%;
+  max-width: 100vw;    /* hard ceiling */
+  overflow-x: hidden;
+  font-family: var(--sans);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  background: var(--bg);
+}
+
+/* ── LAYOUT ── */
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  height: 100vh;
+  width: 100%;
+  max-width: 100vw;
+  position: relative;
+  overflow: hidden;   /* clip shell — intentional */
+}
+
+/* ── HEADER ── */
+#header {
+  width: 100%;
+  max-width: 100%;
+  height: var(--header-h);
+  padding-top: var(--safe-top);
+  background: rgba(245,244,240,0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding-left: 16px;
+  padding-right: 16px;
+  gap: 12px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 20;
+  /* prevent any child from pushing width */
+  overflow: hidden;
+  box-sizing: border-box;
+}
+.header-logo {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.header-logo-mark {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #5b4be8, #7b68f0);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  box-shadow: 0 3px 10px rgba(91,75,232,0.28);
+}
+.header-project-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 7px 14px;
+  cursor: pointer;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  min-width: 0;
+  transition: all 0.15s ease;
+}
+.header-project-btn:active { transform: scale(0.97); }
+.project-dot-sm { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.header-project-btn .proj-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; }
+.header-project-btn .proj-arrow { color: var(--text-faint); flex-shrink: 0; font-size: 11px; }
+.header-add-btn {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: none;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 300;
+  flex-shrink: 0;
+  box-shadow: 0 3px 12px rgba(91,75,232,0.30);
+  transition: all 0.15s ease;
+}
+.header-add-btn:active { transform: scale(0.9); }
+
+/* ── VIEW TABS ── */
+#view-tabs {
+  display: flex;
+  width: 100%;
+  max-width: 100%;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  /* no overflow-x:auto — 3 tabs always fit on any phone */
+}
+.tab-btn {
+  flex: 1;              /* each tab takes equal space — no overflow possible */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0 4px;
+  height: 44px;
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-faint);
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+  min-width: 0;         /* allow shrinking */
+}
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab-badge {
+  min-width: 18px; height: 18px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: var(--radius-pill);
+  font-size: 10px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+}
+
+/* ── CONTENT ── */
+#content { flex: 1; overflow: hidden; position: relative; width: 100%; max-width: 100%; }
+
+/* ── LIST VIEW ── */
+#view-list {
+  height: 100%;
+  width: 100%;
+  max-width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;   /* list items must never cause horizontal scroll */
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-sizing: border-box;
+}
+
+.task-card {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex-shrink: 0;  /* non si rimpicciolisce mai in altezza */
+  position: relative;
+  overflow: hidden;   /* clip the ::before accent bar */
+  /* prevent text from pushing the card wider */
+  word-break: break-word;
+  min-width: 0;
+}
+/* ── REORDER HANDLES ── */
+.reorder-handles {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-shrink: 0;
+  align-self: center;
+}
+.reorder-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 18px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-faint);
+  font-size: 11px;
+  border-radius: 4px;
+  transition: all 0.12s ease;
+  line-height: 1;
+  padding: 0;
+}
+.reorder-btn:active { background: var(--surface3); color: var(--accent); transform: scale(0.9); }
+.reorder-btn:disabled { opacity: 0.2; cursor: default; }
+.reorder-btn:not(:disabled):hover { color: var(--accent); background: var(--accent-dim); }
+
+/* board card reorder handles */
+.board-reorder-handles {
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  margin-top: 6px;
+  justify-content: flex-end;
+}
+.board-reorder-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 20px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  color: var(--text-faint);
+  font-size: 10px;
+  border-radius: 6px;
+  transition: all 0.12s ease;
+  padding: 0;
+  font-family: var(--sans);
+}
+.board-reorder-btn:active { background: var(--accent-dim); color: var(--accent); transform: scale(0.9); }
+.board-reorder-btn:disabled { opacity: 0.2; cursor: default; }
+
+.task-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--todo-color);
+  border-radius: 3px 0 0 3px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.task-card.status-todo::before { opacity: 1; background: var(--todo-color); }
+.task-card.status-inprogress::before { opacity: 1; background: var(--inprogress-color); }
+.task-card.status-done { opacity: 0.55; }
+.task-card:active { transform: scale(0.98); background: var(--surface2); }
+
+.task-card-top { display: flex; align-items: flex-start; gap: 12px; }
+.task-check {
+  width: 20px; height: 20px;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  flex-shrink: 0;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s cubic-bezier(0.34,1.5,0.64,1);
+  margin-top: 1px;
+}
+.task-check:active { transform: scale(0.85); }
+.task-check.checked { background: var(--done-color); border-color: var(--done-color); }
+.task-check.checked::after { content: ''; display: block; width: 9px; height: 6px; border-left: 1.5px solid #fff; border-bottom: 1.5px solid #fff; transform: rotate(-45deg) translate(1px,-1px); }
+.task-card-title {
+  flex: 1;
+  min-width: 0;           /* crucial: allows text to shrink inside flexbox */
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.4;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+.task-card-title.done { text-decoration: line-through; color: var(--text-faint); font-weight: 400; }
+
+.task-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;       /* items wrap — never push card wider */
+  min-width: 0;
+}
+.avatar-sm { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 700; font-family: var(--sans); color: white; flex-shrink: 0; }
+.assignee-name { font-size: 11px; color: var(--text-muted); }
+.meta-sep { width: 3px; height: 3px; border-radius: 50%; background: var(--border); flex-shrink: 0; }
+
+.status-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--sans); font-size: 11px; font-weight: 500;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+.status-pill .pip { width: 5px; height: 5px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+.status-pill.todo { color: var(--todo-color); background: var(--todo-bg); }
+.status-pill.inprogress { color: var(--inprogress-color); background: var(--inprogress-bg); }
+.status-pill.done-status { color: var(--done-color); background: var(--done-bg); }
+
+.date-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-family: var(--mono); font-size: 10px;
+  color: var(--text-faint);
+  background: var(--surface2);
+  border-radius: var(--radius-pill);
+  padding: 2px 8px;
+}
+.date-chip.overdue { color: var(--danger); background: rgba(245,98,93,0.1); }
+.date-chip svg { width: 10px; height: 10px; }
+
+.meta-spacer { flex: 1; }
+
+/* ── SECTION LABELS ── */
+.section-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  padding: 4px 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* ── ADD TASK INLINE ── */
+.add-task-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 16px;
+  background: none;
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  color: var(--text-faint);
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 400;
+  width: 100%;
+  text-align: left;
+  transition: all 0.15s ease;
+}
+.add-task-btn:active { background: var(--surface); color: var(--text-muted); }
+
+/* ── BOARD VIEW ──
+   Board deliberately scrolls horizontally (one column per screen).
+   It is clipped inside #content so it never bleeds into the document. */
+#view-board {
+  height: 100%;
+  width: 100%;
+  max-width: 100%;       /* never wider than the viewport */
+  box-sizing: border-box;
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  /* hide scrollbar — scrolling gesture still works */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+#view-board::-webkit-scrollbar { display: none; }
+
+.board-col {
+  /* colonne a metà schermo: visibili 2+ colonne per drag & drop facile */
+  width: calc(50vw - 22px);
+  min-width: 160px;
+  max-width: 260px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  scroll-snap-align: start;
+  height: 100%;
+  box-sizing: border-box;
+}
+.board-col-header {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  flex-shrink: 0;
+}
+.col-title { font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+.col-title.todo { color: var(--todo-color); }
+.col-title.inprogress { color: var(--inprogress-color); }
+.col-title.done { color: var(--done-color); }
+.col-count {
+  margin-left: auto;
+  font-family: var(--mono); font-size: 10px;
+  color: var(--text-faint);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 1px 7px;
+}
+.board-cards {
+  flex: 1; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 8px;
+  padding-bottom: 8px;
+}
+.board-cards::-webkit-scrollbar { width: 0; }
+
+.board-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+  word-break: break-word;
+}
+.board-card:active { transform: scale(0.97); background: var(--surface2); }
+.board-card.dragging { opacity: 0.3; }
+.board-card.drag-over { border-color: var(--accent); background: var(--accent-dim); }
+
+.card-title { font-size: 12px; font-weight: 500; margin-bottom: 6px; line-height: 1.4; color: var(--text); }
+.card-title.done { text-decoration: line-through; color: var(--text-faint); font-weight: 400; }
+.card-footer { display: flex; align-items: center; gap: 8px; }
+.card-date { font-family: var(--mono); font-size: 10px; color: var(--text-faint); margin-left: auto; }
+.card-date.overdue { color: var(--danger); }
+
+.board-add {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 14px;
+  cursor: pointer;
+  color: var(--text-faint);
+  font-size: 12px;
+  font-family: var(--sans);
+  font-weight: 500;
+  border-radius: var(--radius);
+  border: 1.5px dashed var(--border);
+  background: none;
+  width: 100%;
+  text-align: left;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+.board-add:active { color: var(--text-muted); background: var(--surface); }
+.drop-zone-active { background: var(--accent-dim) !important; border-color: var(--accent) !important; }
+
+/* ══ GANTT ══ */
+
+#view-gantt {
+  height: 100%;
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* Fix 3: Better visible scrollbar */
+.gantt-scroll {
+  flex: 1;
+  overflow: auto;
+  position: relative;
+  scrollbar-width: thin;
+  scrollbar-color: #b5b0a8 var(--surface2);
+}
+.gantt-scroll::-webkit-scrollbar { width: 6px; height: 10px; }
+.gantt-scroll::-webkit-scrollbar-track { background: var(--surface2); border-radius: 6px; }
+.gantt-scroll::-webkit-scrollbar-thumb { background: #b5b0a8; border-radius: 6px; border: 2px solid var(--surface2); }
+.gantt-scroll::-webkit-scrollbar-thumb:hover { background: #8a857d; }
+.gantt-scroll::-webkit-scrollbar-corner { background: var(--surface2); }
+
+/* CSS-table layout — replaced by flex rows below */
+
+/* Month header strip */
+.gantt-head-month {
+  height: 28px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--sans);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-right: 2px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+  white-space: nowrap;
+  padding: 0 4px;
+  background: var(--surface2);
+  box-sizing: border-box;
+}
+
+/* Day header cells */
+.gantt-head-day {
+  height: 40px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--sans);
+  font-size: 9px;
+  color: var(--text-faint);
+  border-right: 1px solid var(--border-light);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+  padding: 2px 0;
+  box-sizing: border-box;
+}
+.gantt-head-day.today { background: rgba(91,75,232,0.07); }
+.gantt-head-day .day-num { font-size: 12px; font-weight: 600; color: var(--text-muted); line-height: 1.2; }
+.gantt-head-day.today .day-num { color: var(--accent); }
+.gantt-head-day .day-name { font-size: 9px; color: var(--text-faint); line-height: 1; }
+
+/* Body rows — flex, with sticky label + relative timeline */
+.gantt-row {
+  display: flex;
+  flex-direction: row;
+  height: 44px;
+  border-bottom: 1px solid var(--border-light);
+  flex-shrink: 0;
+}
+.gantt-row:hover { background: rgba(91,75,232,0.02); }
+
+/* Sticky label cell */
+.gantt-label-cell {
+  position: sticky;
+  left: 0;
+  z-index: 3;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  cursor: pointer;
+  transition: background 0.1s;
+  width: clamp(110px, 28vw, 160px);
+  min-width: clamp(110px, 28vw, 160px);
+  max-width: clamp(110px, 28vw, 160px);
+  box-sizing: border-box;
+}
+.gantt-row:hover .gantt-label-cell { background: var(--surface3); }
+.gantt-label-cell .g-title {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+.gantt-label-cell .g-title.done { text-decoration: line-through; color: var(--text-faint); }
+
+/* Fix 1: Single position:relative timeline container per row — bar never drifts */
+.gantt-timeline {
+  position: relative;
+  height: 44px;
+  flex-shrink: 0;
+  overflow: visible;
+}
+
+/* Bar — absolutely positioned inside .gantt-timeline (position:relative) */
+.gantt-bar {
+  position: absolute;
+  height: 26px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-radius: 8px;
+  cursor: grab;
+  transition: opacity 0.15s;
+  min-width: 8px;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  overflow: hidden;
+  box-sizing: border-box;
+  background: linear-gradient(135deg, var(--accent), #7b68f0);
+  box-shadow: 0 2px 8px rgba(91,75,232,0.28);
+  z-index: 2;
+}
+.gantt-bar:hover { opacity: 0.85; }
+.gantt-bar.inprogress { background: linear-gradient(135deg, #e09000, var(--inprogress-color)); box-shadow: 0 2px 8px rgba(192,120,0,0.25); }
+.gantt-bar.done { background: linear-gradient(135deg, #c8c4be, #b0aca6); box-shadow: none; }
+.gantt-bar-label { font-size: 10px; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: var(--sans); font-weight: 500; pointer-events: none; flex: 1; }
+.gantt-resize-handle { position: absolute; top: 0; bottom: 0; width: 10px; cursor: ew-resize; z-index: 3; }
+.gantt-resize-handle.left  { left: 0;  border-radius: 8px 0 0 8px; }
+.gantt-resize-handle.right { right: 0; border-radius: 0 8px 8px 0; }
+.gantt-resize-handle:hover { background: rgba(255,255,255,0.2); }
+.gantt-no-dates { height: 44px; display: flex; align-items: center; padding: 0 12px; font-family: var(--sans); font-size: 11px; color: var(--text-faint); }
+
+/* Gantt row drag handles (▲▼) */
+.gantt-row-handles {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex-shrink: 0;
+  margin-right: 4px;
+}
+.gantt-row-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 18px; height: 16px;
+  background: none; border: none; cursor: pointer;
+  color: var(--text-faint); font-size: 9px; border-radius: 3px;
+  padding: 0; line-height: 1; transition: all 0.12s ease;
+}
+.gantt-row-btn:hover { color: var(--accent); background: var(--accent-dim); }
+.gantt-row-btn:active { background: var(--accent-dim); color: var(--accent); transform: scale(0.9); }
+.gantt-row-btn:disabled { opacity: 0.15; cursor: default; }
+
+/* Gantt row drag-and-drop */
+.gantt-row[draggable="true"] { cursor: default; }
+.gantt-row.gantt-drag-over { outline: 2px solid var(--accent); outline-offset: -2px; background: var(--accent-dim); }
+.gantt-row.gantt-dragging { opacity: 0.35; }
+
+/* Fix 4: avatar dot inside gantt bar */
+.gantt-bar-avatar {
+  width: 18px; height: 18px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 7px; font-weight: 700; color: white;
+  flex-shrink: 0;
+  border: 1.5px solid rgba(255,255,255,0.35);
+  pointer-events: none;
+  margin-right: 3px;
+}
+
+/* ── BOTTOM NAV ── */
+#bottom-nav {
+  height: var(--nav-h);
+  padding-bottom: var(--safe-bottom);
+  background: rgba(245,244,240,0.96);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  flex-shrink: 0;
+}
+.nav-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 8px 20px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--text-faint);
+  font-family: var(--sans);
+  font-size: 10px;
+  font-weight: 500;
+  transition: all 0.15s ease;
+  border-radius: var(--radius-sm);
+}
+.nav-btn.active { color: var(--accent); }
+.nav-btn svg { width: 22px; height: 22px; }
+.nav-btn-badge {
+  position: absolute;
+  top: -2px; right: -4px;
+  min-width: 16px; height: 16px;
+  background: var(--danger);
+  color: #fff;
+  border-radius: var(--radius-pill);
+  font-size: 9px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 4px;
+}
+.nav-icon-wrap { position: relative; }
+
+/* ── MODALS ── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(30,26,20,0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+  animation: fadeIn 0.18s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── TASK MODAL ── */
+.modal {
+  background: var(--surface);
+  border-radius: 24px 24px 0 0;
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.10), 0 -1px 0 var(--border);
+  width: 100%;
+  max-width: 100vw;   /* never wider than viewport */
+  box-sizing: border-box;
+  max-height: 92dvh;
+  max-height: 92vh;
+  overflow: hidden;
+  animation: slideUp 0.28s cubic-bezier(0.34,1.1,0.64,1);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-bottom: none;
+}
+
+/* Desktop: modal centrata e dimensionata, non a tutto schermo */
+@media (min-width: 600px) {
+  .modal-overlay {
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .modal {
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    max-width: 560px;
+    width: 100%;
+    max-height: min(80vh, 680px);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.15), 0 0 0 1px var(--border);
+    animation: scaleIn 0.22s cubic-bezier(0.34,1.1,0.64,1);
+  }
+  .modal-drag-handle { display: none; }
+  @keyframes scaleIn { from { opacity: 0; transform: scale(0.95) translateY(8px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+}
+.modal-drag-handle {
+  width: 36px; height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin: 12px auto 0;
+  flex-shrink: 0;
+}
+.modal-header {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 18px 20px 16px;
+  flex-shrink: 0;
+}
+.modal-check {
+  width: 24px; height: 24px;
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  flex-shrink: 0;
+  cursor: pointer;
+  margin-top: 2px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s cubic-bezier(0.34,1.5,0.64,1);
+  background: var(--surface2);
+}
+.modal-check:active { transform: scale(0.85); }
+.modal-check.checked { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 4px rgba(124,110,245,0.15); }
+.modal-check.checked::after { content: ''; display: block; width: 11px; height: 7px; border-left: 2px solid #fff; border-bottom: 2px solid #fff; transform: rotate(-45deg) translate(1px,-1px); }
+.modal-title-input {
+  flex: 1;
+  min-width: 0;        /* allow shrinking in flex row */
+  font-family: var(--sans);
+  font-size: 16px;
+  font-weight: 600;
+  border: none; outline: none;
+  color: var(--text);
+  background: transparent;
+  line-height: 1.4;
+  resize: none;
+  width: 100%;
+  max-width: 100%;
+  letter-spacing: -0.3px;
+}
+.modal-title-input::placeholder { color: var(--text-faint); font-weight: 400; }
+.modal-close {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 14px;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.14s;
+  flex-shrink: 0;
+  margin-top: 0;
+}
+.modal-close:active { background: var(--surface3); }
+
+.modal-body {
+  padding: 0 20px 16px;
+  overflow-y: auto;
+  overflow-x: hidden;   /* never scroll horizontally inside modal */
+  flex: 1;
+  width: 100%;
+  box-sizing: border-box;
+}
+.modal-body::-webkit-scrollbar { width: 0; }
+
+.modal-desc {
+  font-family: var(--sans);
+  font-size: 13px;
+  border: none; outline: none;
+  color: var(--text-muted);
+  background: transparent;
+  resize: none;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  line-height: 1.7;
+  min-height: 50px;
+  margin-bottom: 20px;
+  word-break: break-word;
+}
+.modal-desc::placeholder { color: var(--text-faint); }
+
+.modal-fields { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  width: 100%;
+  /* 1fr columns can never cause overflow — they split available space */
+}
+
+.modal-field-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: all 0.14s ease;
+  position: relative;
+  min-height: 60px;
+  min-width: 0;         /* allow grid cells to shrink */
+  overflow: hidden;     /* clip any overflowing child text */
+  box-sizing: border-box;
+}
+.modal-field-card:active { background: var(--surface3); }
+.field-label { font-family: var(--sans); font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-faint); margin-bottom: 6px; }
+.field-value {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.field-value.placeholder { color: var(--text-faint); font-weight: 400; }
+
+.modal-divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+.modal-actions { display: flex; gap: 10px; padding: 16px 20px; border-top: 1px solid var(--border); flex-shrink: 0; padding-bottom: max(16px, var(--safe-bottom)); }
+
+.btn {
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 13px 20px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.btn:active { transform: scale(0.97); }
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  flex: 1;
+  box-shadow: 0 3px 12px rgba(91,75,232,0.25);
+}
+.btn-primary:active { opacity: 0.85; }
+.btn-danger { background: rgba(245,98,93,0.1); color: var(--danger); border-color: rgba(245,98,93,0.25); }
+.btn-danger:active { background: rgba(245,98,93,0.2); }
+
+/* ── DROPDOWN PANEL ── */
+.dropdown-panel {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  width: 100%;                  /* match viewport exactly */
+  max-width: 100vw;
+  box-sizing: border-box;
+  background: var(--surface);
+  border-radius: 24px 24px 0 0;
+  border: 1px solid var(--border);
+  border-bottom: none;
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.10), 0 -1px 0 var(--border);
+  z-index: 200;
+  animation: slideUp 0.22s cubic-bezier(0.34,1.1,0.64,1);
+  padding-bottom: max(20px, var(--safe-bottom));
+  max-height: 70vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.dropdown-panel::-webkit-scrollbar { width: 0; }
+.dp-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 12px auto 4px; }
+.dp-title { font-size: 13px; font-weight: 600; color: var(--text-faint); text-align: center; padding: 8px 20px 16px; }
+.dp-overlay { position: fixed; inset: 0; z-index: 199; background: rgba(30,26,20,0.30); }
+.dp-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  cursor: pointer;
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text);
+  transition: background 0.1s;
+}
+.dp-option:active { background: var(--surface2); }
+.dp-option.active { color: var(--accent); font-weight: 600; }
+.dp-option .opt-icon { width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 14px; }
+.dp-sep { height: 1px; background: var(--border); margin: 6px 20px; }
+
+/* ── PROJECT LIST PANEL ── */
+.panel-project-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 20px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.panel-project-item:active { background: var(--surface2); }
+.panel-project-item.active { color: var(--accent); }
+.proj-color-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.proj-item-name { flex: 1; font-size: 14px; font-weight: 400; color: var(--text); }
+.proj-item-count {
+  font-family: var(--mono); font-size: 10px;
+  color: var(--text-faint);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 2px 8px;
+}
+.panel-add-project {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 20px;
+  cursor: pointer;
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 500;
+}
+.panel-add-project:active { background: var(--surface2); }
+.panel-danger-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 20px;
+  cursor: pointer;
+  color: var(--danger);
+  font-size: 14px;
+  font-weight: 400;
+}
+.panel-danger-item:active { background: rgba(245,98,93,0.1); }
+
+/* ── DATE PICKER POPUP ── */
+#datepicker-popup {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  width: 100%;
+  max-width: 100vw;
+  box-sizing: border-box;
+  background: var(--surface);
+  border-radius: 24px 24px 0 0;
+  border: 1px solid var(--border);
+  border-bottom: none;
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.10), 0 -1px 0 var(--border);
+  z-index: 300;
+  display: none;
+  padding-bottom: max(20px, var(--safe-bottom));
+  animation: slideUp 0.22s cubic-bezier(0.34,1.1,0.64,1);
+  overflow: hidden;   /* contain the grid */
+}
+.dp-nav-row { display: flex; align-items: center; padding: 12px 20px; gap: 12px; }
+.dp-month-year { flex: 1; text-align: center; font-size: 15px; font-weight: 600; color: var(--text); }
+.dp-nav-btn { width: 34px; height: 34px; border: 1px solid var(--border); border-radius: 50%; background: var(--surface2); color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: all 0.14s; flex-shrink: 0; }
+.dp-nav-btn:active { background: var(--surface3); }
+.dp-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);  /* 7 equal cols, always fit */
+  gap: 2px;
+  padding: 0 12px 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.dp-dow { text-align: center; font-family: var(--sans); font-size: 10px; font-weight: 600; color: var(--text-faint); padding: 6px 0; letter-spacing: 0.05em; }
+.dp-day {
+  border: none; background: none;
+  font-family: var(--sans); font-size: 13px; color: var(--text-muted);
+  cursor: pointer; border-radius: 10px;
+  aspect-ratio: 1;          /* square cells that resize with the grid */
+  min-height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.1s; font-weight: 400;
+  width: 100%;
+}
+.dp-day:active { background: var(--surface3); }
+.dp-day.other-month { color: var(--text-faint); }
+.dp-day.today { color: var(--accent); font-weight: 700; }
+.dp-day.selected { background: var(--accent); color: #fff; font-weight: 600; box-shadow: 0 2px 8px rgba(124,110,245,0.4); }
+.dp-day.in-range { background: var(--accent-dim); color: var(--accent); border-radius: 0; }
+.dp-actions { display: flex; gap: 10px; padding: 8px 16px 4px; }
+.dp-action-btn { flex: 1; padding: 11px; border: 1px solid var(--border); background: var(--surface2); border-radius: var(--radius-sm); cursor: pointer; font-family: var(--sans); font-size: 12px; font-weight: 500; color: var(--text-muted); transition: all 0.14s; }
+.dp-action-btn:active { background: var(--surface3); }
+#dp-overlay { position: fixed; inset: 0; z-index: 299; background: rgba(30,26,20,0.30); display: none; }
+
+/* ── PROJECT MODAL ── */
+.center-modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(30,26,20,0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+.center-modal {
+  background: var(--surface);
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  padding: 24px;
+  width: 100%;
+  max-width: min(360px, calc(100vw - 40px));  /* never clip on narrow phones */
+  box-sizing: border-box;
+  animation: slideUp 0.22s cubic-bezier(0.34,1.1,0.64,1);
+}
+.center-modal h3 { font-size: 17px; font-weight: 700; margin-bottom: 16px; letter-spacing: -0.3px; }
+.modal-input {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 13px 16px;
+  font-family: var(--sans);
+  font-size: 15px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.14s;
+  margin-bottom: 16px;
+}
+.modal-input:focus { border-color: var(--accent); }
+.modal-input::placeholder { color: var(--text-faint); }
+.center-modal-actions { display: flex; gap: 10px; }
+
+/* ── CONFIRM MODAL ── */
+#confirm-overlay {
+  position: fixed; inset: 0;
+  background: rgba(30,26,20,0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 300;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+#confirm-modal {
+  background: var(--surface);
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  padding: 24px;
+  width: 100%;
+  max-width: min(340px, calc(100vw - 40px));
+  box-sizing: border-box;
+  text-align: center;
+  animation: slideUp 0.22s cubic-bezier(0.34,1.1,0.64,1);
+}
+#confirm-title { font-size: 16px; font-weight: 700; margin-bottom: 10px; word-break: break-word; }
+#confirm-body { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.6; }
+.confirm-actions { display: flex; gap: 10px; }
+.confirm-actions .btn { flex: 1; }
+
+/* ── EMPTY STATE ── */
+.empty-state {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  height: 100%;
+  gap: 12px;
+  padding: 40px;
+  text-align: center;
+  width: 100%; box-sizing: border-box;
+}
+.empty-icon { font-size: 44px; margin-bottom: 4px; opacity: 0.5; }
+.empty-state p { font-size: 15px; font-weight: 500; color: var(--text-muted); }
+.empty-state small { font-size: 12px; color: var(--text-faint); }
+
+/* ── ASSIGNEE INPUT ── */
+.assignee-input-wrap { position: relative; min-width: 0; overflow: hidden; }
+#modal-assignee { width: 0; height: 0; opacity: 0; position: absolute; pointer-events: none; }
+.assignee-display { display: flex; align-items: center; gap: 8px; cursor: pointer; min-width: 0; overflow: hidden; }
+.assignee-chip { display: flex; align-items: center; gap: 6px; background: var(--surface3); border-radius: var(--radius-pill); padding: 4px 10px 4px 4px; min-width: 0; overflow: hidden; }
+
+/* ── STATUS SELECT ── */
+#modal-status { display: none; }
+
+/* ── CONTEXT MENU ── */
+.ctx-menu {
+  position: fixed;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+  z-index: 500;
+  min-width: 180px;
+  max-width: calc(100vw - 24px);  /* never clip off-screen */
+  overflow: hidden;
+}
+.ctx-item { padding: 12px 16px; cursor: pointer; font-size: 13px; font-family: var(--sans); color: var(--text); transition: background 0.1s; }
+.ctx-item:active { background: var(--surface2); }
+.ctx-item.danger { color: var(--danger); }
+
+/* ── GLOBAL RESPONSIVE SAFEGUARDS ──
+   These are the last-resort rules that prevent ANY element from
+   causing horizontal scroll. Applied after all other styles. */
+img, video, svg, canvas, iframe, embed, object {
+  max-width: 100%;
+  height: auto;
+}
+input, textarea, select, button {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* ── SCROLLBAR GLOBAL — hide everywhere except gantt ── */
+*:not(.gantt-scroll) { scrollbar-width: none; }
+*:not(.gantt-scroll)::-webkit-scrollbar { display: none; }
+
+/* ── TRANSITIONS ── */
+.view-enter { animation: fadeIn 0.2s ease; }
+
+/* ── SETTINGS PANEL ── */
+.settings-section-title {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--text-faint);
+  padding: 16px 20px 8px;
+}
+.settings-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 20px;
+}
+.settings-item-label { flex: 1; font-size: 14px; color: var(--text); }
+.settings-item-sub { font-size: 11px; color: var(--text-faint); }
+.settings-remove-btn {
+  background: rgba(217,48,37,0.08); border: 1px solid rgba(217,48,37,0.2);
+  border-radius: 8px; padding: 5px 10px; font-size: 12px;
+  cursor: pointer; color: var(--danger); font-family: var(--sans);
+  transition: background 0.1s;
+}
+.settings-remove-btn:active { background: rgba(217,48,37,0.18); }
+.settings-add-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 20px;
+}
+.settings-add-input {
+  flex: 1; background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 9px 12px;
+  font-family: var(--sans); font-size: 13px; color: var(--text);
+  outline: none; transition: border-color 0.14s;
+}
+.settings-add-input:focus { border-color: var(--accent); }
+.settings-add-btn {
+  background: var(--accent); color: #fff; border: none;
+  border-radius: var(--radius-sm); padding: 9px 16px;
+  font-family: var(--sans); font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: opacity 0.14s; white-space: nowrap;
+}
+.settings-add-btn:active { opacity: 0.8; }
+
+/* ── TASK TYPE BADGE ── */
+.type-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10px; font-weight: 600;
+  padding: 2px 8px; border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+.color-swatch {
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 2px solid var(--border); cursor: pointer;
+  flex-shrink: 0; transition: transform 0.15s;
+}
+.color-swatch:active { transform: scale(0.88); }
+.color-swatch.selected { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
+.color-picker-row {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  padding: 4px 20px 12px;
+}
+
+/* ── FILTER & SORT BAR ── */
+#filter-sort-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  box-sizing: border-box;
+  flex-wrap: nowrap;
+}
+#filter-sort-bar::-webkit-scrollbar { display: none; }
+
+.filter-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 11px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  font-family: var(--sans); font-size: 12px; font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer; white-space: nowrap; flex-shrink: 0;
+  transition: all 0.14s ease;
+}
+.filter-chip:active { background: var(--surface3); }
+.filter-chip.active {
+  background: var(--accent-dim);
+  border-color: var(--accent-border);
+  color: var(--accent);
+}
+.filter-chip .chip-dot {
+  width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+}
+.filter-sep {
+  width: 1px; height: 18px; background: var(--border); flex-shrink: 0;
+}
+
+/* ── DESKTOP LIST OPTIMISATION ── */
+@media (min-width: 600px) {
+  #view-list { padding: 16px 24px; max-width: 900px; margin: 0 auto; }
+  .task-card { flex-direction: row; align-items: center; gap: 14px; padding: 12px 18px; }
+  .task-card-top { flex: 1; min-width: 0; }
+  .task-card-meta { flex-shrink: 0; flex-wrap: nowrap; }
+  .task-card-title { white-space: normal; overflow-wrap: break-word; }
+
+  /* Fix 2: project selector più compatto su desktop */
+  .header-project-btn {
+    flex: 0 0 auto;
+    max-width: 180px;
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+
+  /* Fix 1: datepicker come popup centrato su desktop */
+  #datepicker-popup {
+    bottom: auto;
+    left: 50%;
+    right: auto;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 320px;
+    max-width: 320px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    max-height: none;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+  }
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HEADER -->
+  <div id="header">
+    <div class="header-logo">
+      <div class="header-logo-mark">✦</div>
+      ehivents
+    </div>
+    <button class="header-project-btn" id="project-selector-btn" onclick="openProjectsPanel()">
+      <div class="project-dot-sm" id="header-proj-dot" style="background:#5b4be8"></div>
+      <span class="proj-name" id="header-proj-name">Nessun progetto</span>
+      <span class="proj-arrow">▾</span>
+    </button>
+    <button class="header-add-btn" onclick="openTaskModal(null)" id="add-task-btn">+</button>
+    <button onclick="openSettingsPanel()" style="width:34px;height:34px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:16px;flex-shrink:0;transition:all 0.15s ease" title="Impostazioni">⚙️</button>
+  </div>
+
+  <!-- VIEW TABS -->
+  <div id="view-tabs">
+    <button class="tab-btn active" data-view="list" onclick="switchView('list')">
+      <svg viewBox="0 0 16 16" fill="currentColor" width="14" height="14"><rect x="2" y="3" width="12" height="1.5" rx=".75"/><rect x="2" y="7" width="8" height="1.5" rx=".75"/><rect x="2" y="11" width="10" height="1.5" rx=".75"/></svg>
+      Lista
+    </button>
+    <button class="tab-btn" data-view="board" onclick="switchView('board')">
+      <span class="nav-icon-wrap">
+        <svg viewBox="0 0 16 16" fill="currentColor" width="14" height="14"><rect x="1" y="2" width="4" height="12" rx="1.5"/><rect x="6" y="2" width="4" height="8" rx="1.5"/><rect x="11" y="2" width="4" height="10" rx="1.5"/></svg>
+        <span class="nav-btn-badge" id="badge-board" style="display:none">0</span>
+      </span>
+      Board
+    </button>
+    <button class="tab-btn" data-view="gantt" onclick="switchView('gantt')">
+      <svg viewBox="0 0 16 16" fill="currentColor" width="14" height="14"><rect x="1" y="3" width="7" height="2.5" rx="1.25"/><rect x="1" y="7" width="11" height="2.5" rx="1.25"/><rect x="1" y="11" width="9" height="2.5" rx="1.25"/></svg>
+      Gantt
+    </button>
+  </div>
+
+  <!-- FILTER & SORT BAR -->
+  <div id="filter-sort-bar">
+    <span style="font-size:11px;font-weight:600;color:var(--text-faint);flex-shrink:0;white-space:nowrap">👤</span>
+    <div id="assignee-chips" style="display:flex;gap:6px;flex-shrink:0"></div>
+  </div>
+
+  <!-- CONTENT -->
+  <div id="content">
+    <div id="view-list"></div>
+    <div id="view-board" style="display:none"></div>
+    <div id="view-gantt" style="display:none;flex-direction:column"></div>
+  </div>
+
+</div>
+
+<!-- PROJECT PANEL -->
+<div id="projects-panel-overlay" class="dp-overlay" onclick="closeProjectsPanel()" style="display:none"></div>
+<div id="projects-panel" class="dropdown-panel" style="display:none">
+  <div class="dp-handle"></div>
+  <div class="dp-title">Progetti</div>
+  <div id="panel-project-list"></div>
+  <div class="dp-sep"></div>
+  <div class="panel-add-project" onclick="closeProjectsPanel();openProjectModal()">
+    <span style="font-size:18px;line-height:1">+</span>
+    Nuovo progetto
+  </div>
+  <div class="dp-sep"></div>
+  <div class="panel-danger-item" onclick="closeProjectsPanel();confirmResetAll()">
+    <span style="font-size:16px">⚠</span>
+    Reset dati
+  </div>
+</div>
+
+<!-- TASK MODAL -->
+<div class="modal-overlay" id="task-modal-overlay" style="display:none" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-drag-handle"></div>
+    <div class="modal-header">
+      <div class="modal-check" id="modal-check" onclick="toggleModalDone()"></div>
+      <textarea class="modal-title-input" id="modal-title" placeholder="Nome task…" rows="1" oninput="autoResize(this)"></textarea>
+      <button class="modal-close" onclick="closeTaskModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <textarea class="modal-desc" id="modal-desc" placeholder="Aggiungi una descrizione…" rows="2" oninput="autoResize(this)"></textarea>
+      <div class="modal-fields">
+        <div class="field-row">
+          <!-- STATUS -->
+          <div class="modal-field-card" onclick="openStatusPicker(this)">
+            <div class="field-label">Status</div>
+            <div class="field-value" id="status-display"><span class="pip" style="width:8px;height:8px;border-radius:50%;background:var(--todo-color);flex-shrink:0"></span> To Do</div>
+            <select id="modal-status"><option value="todo">To Do</option><option value="inprogress">In Progress</option><option value="done">Done</option></select>
+          </div>
+          <!-- ASSIGNEE -->
+          <div class="modal-field-card assignee-input-wrap" onclick="openAssigneePicker(this)">
+            <div class="field-label">Assegnatario</div>
+            <div class="field-value placeholder" id="assignee-display">—</div>
+            <input type="hidden" id="modal-assignee">
+          </div>
+        </div>
+        <!-- TIPO TASK -->
+        <div class="modal-field-card" onclick="openTypePicker()" style="width:100%">
+          <div class="field-label">Tipo</div>
+          <div class="field-value placeholder" id="type-display">—</div>
+          <input type="hidden" id="modal-type">
+        </div>
+        <div class="field-row">
+          <!-- START DATE -->
+          <div class="modal-field-card" id="start-display" onclick="openDatePicker('start',this)">
+            <div class="field-label">Inizio</div>
+            <div class="field-value placeholder" id="start-text">Seleziona</div>
+          </div>
+          <!-- DUE DATE -->
+          <div class="modal-field-card" id="due-display" onclick="openDatePicker('due',this)">
+            <div class="field-label">Scadenza</div>
+            <div class="field-value placeholder" id="due-text">Seleziona</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-danger" id="modal-delete-btn" onclick="deleteCurrentTask()" style="display:none">Elimina</button>
+      <button class="btn btn-primary" onclick="saveTask()">Salva</button>
+    </div>
+  </div>
+</div>
+
+<!-- STATUS PICKER PANEL -->
+<div id="status-panel-overlay" class="dp-overlay" onclick="closeStatusPicker()" style="display:none"></div>
+<div id="status-panel" class="dropdown-panel" style="display:none">
+  <div class="dp-handle"></div>
+  <div class="dp-title">Seleziona status</div>
+  <div class="dp-option" onclick="pickStatus('todo')"><div class="opt-icon" style="background:var(--todo-bg)">🔵</div>To Do</div>
+  <div class="dp-option" onclick="pickStatus('inprogress')"><div class="opt-icon" style="background:var(--inprogress-bg)">🟡</div>In Progress</div>
+  <div class="dp-option" onclick="pickStatus('done')"><div class="opt-icon" style="background:var(--done-bg)">✅</div>Done</div>
+</div>
+
+<!-- ASSIGNEE PICKER PANEL -->
+<div id="assignee-panel-overlay" class="dp-overlay" onclick="closeAssigneePicker()" style="display:none"></div>
+<div id="assignee-panel" class="dropdown-panel" style="display:none">
+  <div class="dp-handle"></div>
+  <div class="dp-title">Seleziona assegnatario</div>
+  <div id="assignee-options"></div>
+  <div class="dp-sep"></div>
+  <div class="dp-option" id="assignee-custom-row">
+    <div class="opt-icon" style="background:var(--surface3)">✏️</div>
+    <input id="assignee-custom-input" placeholder="Altro nome…" style="flex:1;background:none;border:none;outline:none;font-family:var(--sans);font-size:14px;color:var(--text);" onclick="event.stopPropagation()">
+    <button onclick="confirmCustomAssignee()" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-family:var(--sans);font-size:12px;font-weight:600;cursor:pointer">OK</button>
+  </div>
+  <div class="dp-sep"></div>
+  <div class="dp-option" onclick="pickAssignee('')"><div class="opt-icon" style="background:var(--surface3)">✕</div>Rimuovi</div>
+</div>
+
+<!-- DATE PICKER -->
+<div id="dp-overlay" onclick="dpDismiss()"></div>
+<div id="datepicker-popup">
+  <div class="dp-handle"></div>
+  <div class="dp-nav-row">
+    <button class="dp-nav-btn" onclick="dpNavigate(-1)">‹</button>
+    <span class="dp-month-year" id="dp-month-year"></span>
+    <button class="dp-nav-btn" onclick="dpNavigate(1)">›</button>
+  </div>
+  <div class="dp-grid" id="dp-grid"></div>
+  <div class="dp-actions">
+    <button class="dp-action-btn" onclick="dpSelectToday()">Oggi</button>
+    <button class="dp-action-btn" onclick="dpClear()">Rimuovi</button>
+  </div>
+</div>
+
+<!-- PROJECT MODAL -->
+<div class="center-modal-overlay" id="project-modal-overlay" onclick="handleProjectOverlayClick(event)">
+  <div class="center-modal">
+    <h3>Nuovo progetto</h3>
+    <input class="modal-input" id="project-name-input" placeholder="Nome progetto…" maxlength="50"
+      onkeydown="if(event.key==='Enter')saveProject();if(event.key==='Escape')closeProjectModal()">
+    <div class="center-modal-actions">
+      <button class="btn" onclick="closeProjectModal()">Annulla</button>
+      <button class="btn btn-primary" onclick="saveProject()">Crea</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM OVERLAY -->
+<div id="confirm-overlay" onclick="if(event.target===this)closeConfirm()">
+  <div id="confirm-modal">
+    <div id="confirm-title"></div>
+    <div id="confirm-body"></div>
+    <div class="confirm-actions">
+      <button class="btn" onclick="closeConfirm()">Annulla</button>
+      <button class="btn btn-danger" onclick="confirmAction()">Conferma</button>
+    </div>
+  </div>
+</div>
+
+<!-- RENAME PROJECT MODAL -->
+<div class="center-modal-overlay" id="rename-project-overlay" style="display:none" onclick="if(event.target===this)closeRenameProject()">
+  <div class="center-modal">
+    <h3>Rinomina progetto</h3>
+    <input type="hidden" id="rename-project-id">
+    <input class="modal-input" id="rename-project-input" placeholder="Nuovo nome…" maxlength="50"
+      onkeydown="if(event.key==='Enter')saveRenameProject();if(event.key==='Escape')closeRenameProject()">
+    <div class="center-modal-actions">
+      <button class="btn" onclick="closeRenameProject()">Annulla</button>
+      <button class="btn btn-primary" onclick="saveRenameProject()">Rinomina</button>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS PANEL -->
+<div id="settings-panel-overlay" class="dp-overlay" onclick="closeSettingsPanel()" style="display:none"></div>
+<div id="settings-panel" class="dropdown-panel" style="display:none">
+  <div class="dp-handle"></div>
+  <div class="dp-title">Impostazioni</div>
+
+  <!-- UTENTI -->
+  <div class="settings-section-title">👥 Team</div>
+  <div id="settings-users-list"></div>
+  <div class="settings-add-row">
+    <input class="settings-add-input" id="new-user-input" placeholder="Nome utente…" maxlength="40"
+      onkeydown="if(event.key==='Enter')addUser()">
+    <button class="settings-add-btn" onclick="addUser()">Aggiungi</button>
+  </div>
+
+  <div class="dp-sep"></div>
+
+  <!-- TIPOLOGIE TASK -->
+  <div class="settings-section-title">🏷 Tipologie task</div>
+  <div id="settings-types-list"></div>
+  <div class="settings-add-row" style="flex-direction:column;align-items:stretch;gap:10px">
+    <input class="settings-add-input" id="new-type-name-input" placeholder="Nome tipologia…" maxlength="30"
+      onkeydown="if(event.key==='Enter')addTaskType()">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:12px;color:var(--text-muted);flex-shrink:0">Colore:</span>
+      <div class="color-picker-row" id="new-type-color-picker" style="padding:0;flex:1"></div>
+    </div>
+    <button class="settings-add-btn" onclick="addTaskType()" style="align-self:flex-start">Aggiungi tipologia</button>
+  </div>
+
+  <div class="dp-sep" style="margin-top:8px"></div>
+  <div class="panel-danger-item" onclick="closeSettingsPanel();confirmResetAll()">
+    <span style="font-size:16px">⚠</span>
+    Reset dati
+  </div>
+</div>
+
+<!-- TYPE PICKER PANEL -->
+<div id="type-panel-overlay" class="dp-overlay" onclick="closeTypePicker()" style="display:none"></div>
+<div id="type-panel" class="dropdown-panel" style="display:none">
+  <div class="dp-handle"></div>
+  <div class="dp-title">Seleziona tipologia</div>
+  <div id="type-options"></div>
+  <div class="dp-sep"></div>
+  <div class="dp-option" onclick="pickType('')"><div class="opt-icon" style="background:var(--surface3)">✕</div>Nessuna tipologia</div>
+</div>
+
+<script>
+const DAY_W = 40;
+const MONTHS_IT=['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  FIREBASE REALTIME DATABASE — piano Spark (gratuito)         ║
+// ║  ─────────────────────────────────────────────────────────── ║
+// ║  Nessun billing richiesto. REST puro, zero dipendenze.       ║
+// ║  Regole database (Database → Rules):                         ║
+// ║    { "rules": { ".read": true, ".write": true } }            ║
+// ╚══════════════════════════════════════════════════════════════╝
+
+// URL del tuo Realtime Database (lo trovi in Firebase → RTDB → Data)
+// Formato: https://<project>-default-rtdb.<region>.firebasedatabase.app
+const RTDB_URL = 'https://pm-tool-dda58-default-rtdb.europe-west1.firebasedatabase.app';
+
+// Nodo dove salviamo tutto lo state
+const RTDB_NODE = `${RTDB_URL}/ehivents/workspace.json`;
+
+// ── STATE ──
+let state = { projects:[], tasks:[], activeProjectId:null, currentView:'list', users:[], taskTypes:[] };
+let editingTaskId = null;
+let _saveTimer  = null;  // debounce write
+let _sseSource  = null;  // EventSource per sync realtime
+let _filterAssignee = '';   // '' = tutti
+
+// ── INDICATORE DI SYNC ──────────────────────────────────────────
+function showSync(icon, msg, color) {
+  let el = document.getElementById('sync-indicator');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'sync-indicator';
+    el.style.cssText = `position:fixed;top:8px;right:12px;z-index:9999;font-family:var(--sans);
+      font-size:11px;font-weight:600;padding:5px 10px;border-radius:20px;
+      display:flex;align-items:center;gap:5px;transition:opacity .4s;pointer-events:none;`;
+    document.body.appendChild(el);
+  }
+  el.style.background = color==='ok' ? '#e6f9ee' : color==='err' ? '#fde8e8' : '#f0eeea';
+  el.style.color      = color==='ok' ? '#1a6b3a' : color==='err' ? '#b91c1c' : '#5a5650';
+  el.style.border     = `1px solid ${color==='ok' ? '#a7f3c4' : color==='err' ? '#fca5a5' : '#dddad4'}`;
+  el.style.opacity    = '1';
+  el.innerHTML        = `${icon} ${msg}`;
+  clearTimeout(el._t);
+  if (color==='ok') el._t = setTimeout(()=>{ el.style.opacity='0'; }, 2000);
+}
+
+// ── DIAGNOSTICA rapida — apri console (F12) per vedere i dettagli ─
+async function rtdbDiag() {
+  console.group('🔥 RTDB Diagnostica');
+  console.log('URL:', RTDB_NODE);
+  try {
+    const r = await fetch(RTDB_NODE);
+    const body = await r.text();
+    console.log('GET status:', r.status, r.statusText);
+    console.log('GET body:', body.slice(0, 300));
+  } catch(e) { console.error('GET fallito (rete / CORS):', e); }
+  try {
+    const r = await fetch(RTDB_NODE, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ _test: true }),
+    });
+    const body = await r.text();
+    console.log('PUT status:', r.status, r.statusText);
+    console.log('PUT body:', body.slice(0, 300));
+  } catch(e) { console.error('PUT fallito (rete / CORS):', e); }
+  console.groupEnd();
+}
+// Diagnostica disponibile manualmente da console: rtdbDiag()
+
+// ── SAVE (debounced — PUT su RTDB + localStorage) ────────────────
+function save() {
+  // Salvataggio locale immediato — sempre, anche offline
+  try { localStorage.setItem('flow_v3', JSON.stringify(state)); } catch(_) {}
+  showSync('⏳', 'Salvataggio...', 'neutral');
+
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(async () => {
+    _ignoreSse = true;
+    try {
+      const res = await fetch(RTDB_NODE, {
+        method:  'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(state),
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      _rtdbAvailable = true;
+      showSync('☁ Sincronizzato', '', 'ok');
+      console.log('✅ Salvato su Firebase');
+    } catch(e) {
+      _rtdbAvailable = false;
+      showSync('⚠️ Solo locale', '', 'err');
+      console.warn('RTDB save fallito:', e.message);
+      setTimeout(()=>{ const el=document.getElementById('sync-indicator'); if(el) el.style.opacity='0'; }, 3000);
+    } finally {
+      _saveTimer = null;
+      setTimeout(()=>{ _ignoreSse = false; }, 1000);
+    }
+  }, 600);
+}
+
+// ── LOAD (GET da RTDB, fallback localStorage) ────────────────────
+let _rtdbAvailable = false;
+
+async function load() {
+  showSync('⏳', 'Caricamento...', 'neutral');
+
+  // 1. Prima prova Firebase — è la fonte di verità
+  try {
+    const res = await fetch(RTDB_NODE);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const remote = await res.json();
+    _rtdbAvailable = true;
+    console.log('📥 Dati da Firebase:', remote);
+
+    // Firebase può restituire null se il nodo è vuoto
+    if (remote && typeof remote === 'object' && remote.projects && remote.tasks) {
+      _applyState(remote, true);
+      showSync('☁ Sincronizzato', '', 'ok');
+      console.log('✅ Stato caricato da Firebase');
+      return; // Firebase ha i dati, non serve localStorage
+    } else {
+      // Firebase raggiungibile ma nodo vuoto — prova localStorage
+      console.log('ℹ️ Firebase vuoto, provo localStorage');
+      _tryLoadLocalStorage();
+      showSync('✓', 'Pronto', 'ok');
+    }
+  } catch(e) {
+    // Firebase non raggiungibile — usa localStorage come fallback
+    _rtdbAvailable = false;
+    console.warn('Firebase non raggiungibile:', e.message);
+    _tryLoadLocalStorage();
+    showSync('📱 Offline', '', 'neutral');
+    setTimeout(()=>{ const el=document.getElementById('sync-indicator'); if(el) el.style.opacity='0'; }, 3000);
+  }
+}
+
+function _tryLoadLocalStorage() {
+  try {
+    const raw = localStorage.getItem('flow_v3') || localStorage.getItem('flow_v2');
+    if (raw) {
+      const p = JSON.parse(raw);
+      if (p?.projects && p?.tasks) {
+        _applyState(p, false);
+        console.log('📦 Stato caricato da localStorage');
+        // Se Firebase è disponibile, carica subito i dati locali su Firebase
+        if (_rtdbAvailable) save();
+      }
+    }
+  } catch(_) {}
+}
+
+function _applyState(s, saveLocal) {
+  state = s;
+  if (!state.projects)    state.projects    = [];
+  if (!state.tasks)       state.tasks       = [];
+  if (!state.currentView) state.currentView = 'list';
+  if (!state.users)       state.users       = [];
+  if (!state.taskTypes)   state.taskTypes   = [];
+  if (!state.projects.find(p => p.id === state.activeProjectId))
+    state.activeProjectId = state.projects.length ? state.projects[0].id : null;
+  if (saveLocal) try { localStorage.setItem('flow_v3', JSON.stringify(state)); } catch(_) {}
+}
+
+// ── REALTIME SYNC via SSE (Server-Sent Events) ───────────────────
+// RTDB supporta nativamente SSE: basta aggiungere Accept: text/event-stream.
+// Quando un altro dispositivo scrive, il server ci spinge l'aggiornamento
+// in meno di 1 secondo — senza polling, senza SDK.
+let _ignoreSse = false;
+
+function startRealtimeSync() {
+  if (!_rtdbAvailable) return;  // offline — non aprire SSE
+  // EventSource apre una connessione HTTP persistente verso RTDB
+  _sseSource = new EventSource(`${RTDB_NODE}?timeout=600s`);
+
+  _sseSource.addEventListener('put', e => {
+    if (_ignoreSse) return;           // nostra stessa scrittura → ignora
+    try {
+      const msg = JSON.parse(e.data);
+      // path '/' = aggiornamento completo del nodo
+      if (msg.path === '/' && msg.data?.projects && msg.data?.tasks) {
+        const prevActive = state.activeProjectId;
+        const prevView   = state.currentView;
+        // Aggiorna solo se i dati sono effettivamente cambiati
+        const before = JSON.stringify({p:state.projects, t:state.tasks});
+        const after  = JSON.stringify({p:msg.data.projects, t:msg.data.tasks});
+        if (before === after) return;
+        _applyState(msg.data, true);
+        state.activeProjectId = prevActive || state.activeProjectId;
+        state.currentView     = prevView;
+        updateHeader();
+        renderCurrentView();
+        updateBoardBadge();
+        showSync('🔄', 'Aggiornato', 'ok');
+      }
+    } catch(_) {}
+  });
+
+  _sseSource.addEventListener('cancel', () => {
+    // RTDB chiude la connessione dopo timeout — riapriamo
+    setTimeout(startRealtimeSync, 3000);
+  });
+
+  _sseSource.onerror = () => {
+    _sseSource.close();
+    if (_rtdbAvailable) setTimeout(startRealtimeSync, 5000);  // riconnette solo se online
+  };
+}
+
+// ── UTILS ──
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+function initials(name) { if (!name) return '?'; return name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2); }
+function avatarColor(name) {
+  if (!name) return '#9c988f';
+  const colors = ['#5b4be8','#7b68f0','#3b67e8','#1a8f4a','#c07800','#d93025','#0891b2','#c0287a'];
+  let h = 0; for (let i=0;i<name.length;i++) h=(h*31+name.charCodeAt(i))&0xffffffff;
+  return colors[Math.abs(h)%colors.length];
+}
+function fmtDate(iso) { if (!iso) return ''; const d=new Date(iso+'T00:00:00'); return d.toLocaleDateString('it-IT',{day:'2-digit',month:'short'}); }
+function isOverdue(iso) { if (!iso) return false; return new Date(iso+'T00:00:00') < new Date(new Date().toDateString()); }
+function today() { return new Date().toISOString().slice(0,10); }
+function autoResize(el) { el.style.height='auto'; el.style.height=el.scrollHeight+'px'; }
+function activeTasks() { return state.tasks.filter(t => t.projectId === state.activeProjectId); }
+function tasksByStatus(s) { return activeTasks().filter(t => t.status === s); }
+function escHtml(s) { if (!s) return ''; return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function addDays(iso, n) { const d=new Date(iso+'T00:00:00'); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10); }
+function daysBetween(a, b) { return Math.round((new Date(b+'T00:00:00')-new Date(a+'T00:00:00'))/86400000); }
+
+const PROJECT_COLORS = ['#5b4be8','#c07800','#1a8f4a','#d93025','#7b68f0','#0891b2','#c0287a','#1a6b8a'];
+function projectColor(projectId) { const idx=state.projects.findIndex(p=>p.id===projectId); return PROJECT_COLORS[idx%PROJECT_COLORS.length]; }
+
+// ── HEADER UPDATE ──
+function updateHeader() {
+  const proj = state.projects.find(p=>p.id===state.activeProjectId);
+  const nameEl = document.getElementById('header-proj-name');
+  const dotEl = document.getElementById('header-proj-dot');
+  if (proj) {
+    nameEl.textContent = proj.name;
+    dotEl.style.background = projectColor(proj.id);
+  } else {
+    nameEl.textContent = 'Nessun progetto';
+    dotEl.style.background = '#9c988f';
+  }
+}
+
+// ── PROJECTS PANEL ──
+function openProjectsPanel() {
+  renderProjectsPanel();
+  document.getElementById('projects-panel-overlay').style.display = 'block';
+  document.getElementById('projects-panel').style.display = 'block';
+}
+function closeProjectsPanel() {
+  document.getElementById('projects-panel-overlay').style.display = 'none';
+  document.getElementById('projects-panel').style.display = 'none';
+}
+function renderProjectsPanel() {
+  const list = document.getElementById('panel-project-list');
+  list.innerHTML = state.projects.map(p => {
+    const count = state.tasks.filter(t=>t.projectId===p.id&&t.status!=='done').length;
+    const active = p.id === state.activeProjectId;
+    return `<div class="panel-project-item ${active?'active':''}">
+      <div class="proj-color-dot" style="background:${projectColor(p.id)}"></div>
+      <span class="proj-item-name" onclick="selectProject('${p.id}');closeProjectsPanel()">${escHtml(p.name)}</span>
+      ${count>0?`<span class="proj-item-count">${count}</span>`:''}
+      ${active?'<span style="color:var(--accent);font-size:16px;flex-shrink:0">✓</span>':''}
+      <button onclick="event.stopPropagation();openRenameProject('${p.id}')" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:4px 8px;font-size:11px;cursor:pointer;color:var(--text-muted);font-family:var(--sans);flex-shrink:0">✏️</button>
+      <button onclick="event.stopPropagation();closeProjectsPanel();confirmDeleteProject('${p.id}')" style="background:rgba(217,48,37,0.08);border:1px solid rgba(217,48,37,0.2);border-radius:8px;padding:4px 8px;font-size:11px;cursor:pointer;color:var(--danger);font-family:var(--sans);flex-shrink:0">🗑</button>
+    </div>`;
+  }).join('');
+}
+function selectProject(id) { state.activeProjectId=id; _filterAssignee=''; save(); updateHeader(); renderCurrentView(); updateBoardBadge(); }
+
+// ── RENAME PROJECT ──
+function openRenameProject(projectId) {
+  closeProjectsPanel();
+  const proj = state.projects.find(p=>p.id===projectId);
+  if (!proj) return;
+  document.getElementById('rename-project-id').value = projectId;
+  document.getElementById('rename-project-input').value = proj.name;
+  document.getElementById('rename-project-overlay').style.display = 'flex';
+  setTimeout(()=>document.getElementById('rename-project-input').focus(), 100);
+}
+function closeRenameProject() { document.getElementById('rename-project-overlay').style.display='none'; }
+function saveRenameProject() {
+  const id = document.getElementById('rename-project-id').value;
+  const name = document.getElementById('rename-project-input').value.trim();
+  if (!name) { document.getElementById('rename-project-input').focus(); return; }
+  const proj = state.projects.find(p=>p.id===id);
+  if (proj) { proj.name = name; save(); updateHeader(); renderCurrentView(); }
+  closeRenameProject();
+}
+
+// ── VIEWS ──
+function switchView(v) {
+  state.currentView = v;
+  document.querySelectorAll('.tab-btn').forEach(t => t.classList.toggle('active', t.dataset.view===v));
+  document.getElementById('view-list').style.display = v==='list' ? '' : 'none';
+  const boardEl = document.getElementById('view-board');
+  boardEl.style.display = v==='board' ? 'flex' : 'none';
+  const ganttEl = document.getElementById('view-gantt');
+  ganttEl.style.display = v==='gantt' ? 'flex' : 'none';
+  if (v==='gantt') ganttEl.style.flexDirection = 'column';
+  renderCurrentView();
+  updateBoardBadge();
+}
+function renderCurrentView() {
+  if (state.currentView==='list') renderList();
+  else if (state.currentView==='board') renderBoard();
+  else renderGantt();
+}
+
+function updateBoardBadge() {
+  const badge = document.getElementById('badge-board');
+  if (!badge) return;
+  const count = state.activeProjectId ? state.tasks.filter(t=>t.projectId===state.activeProjectId&&t.status!=='done').length : 0;
+  badge.textContent = count;
+  badge.style.display = count > 0 ? '' : 'none';
+}
+
+// ── LIST ──
+function emptyState(icon, title, sub) {
+  return `<div class="empty-state"><div class="empty-icon">${icon}</div><p>${title}</p>${sub?`<small>${sub}</small>`:''}</div>`;
+}
+
+function renderList() {
+  renderFilterBar();
+  const el = document.getElementById('view-list');
+  if (!state.activeProjectId) { el.innerHTML=emptyState('📁','Nessun progetto','Apri il menu progetti per crearne uno'); return; }
+  const allTasks = activeTasks();
+  if (allTasks.length===0) { el.innerHTML=emptyState('✨','Nessun task','Tocca + per aggiungere il primo task'); return; }
+
+  const tasks = filteredSortedTasks(allTasks);
+
+  const groups = [
+    { id:'todo', label:'Da fare', tasks: tasks.filter(t=>t.status==='todo') },
+    { id:'inprogress', label:'In corso', tasks: tasks.filter(t=>t.status==='inprogress') },
+    { id:'done', label:'Completati', tasks: tasks.filter(t=>t.status==='done') },
+  ].filter(g=>g.tasks.length>0);
+
+  let content = groups.map(g => `
+    <div class="section-label">${g.label} <span style="color:var(--text-faint);font-weight:400;text-transform:none;letter-spacing:0;font-size:11px">${g.tasks.length}</span></div>
+    ${g.tasks.map(t => taskCardHtml(t)).join('')}
+  `).join('');
+
+  if (!content && _filterAssignee) {
+    el.innerHTML = emptyState('🔍','Nessun task per questo assegnatario','');
+    return;
+  }
+
+  el.innerHTML = content + `<div class="add-task-btn" onclick="openTaskModal(null)"><span style="font-size:18px;line-height:1;color:var(--accent)">+</span>Aggiungi task</div>`;
+
+  // Enable manual drag reorder
+  enableListReorder();
+}
+
+function taskCardHtml(t) {
+  const overdue = t.due && isOverdue(t.due) && t.status!=='done';
+  const tp = getTaskType(t.type||'');
+  // Get position among all active tasks (global order)
+  const allActive = activeTasks();
+  const globalIdx = allActive.findIndex(x=>x.id===t.id);
+  const isFirst = globalIdx === 0;
+  const isLast = globalIdx === allActive.length - 1;
+  return `<div class="task-card status-${t.status}" data-id="${t.id}" onclick="openTaskModal('${t.id}')">
+    <div class="task-card-top">
+      <div class="reorder-handles" onclick="event.stopPropagation()">
+        <button class="reorder-btn" ${isFirst?'disabled':''} onclick="event.stopPropagation();moveTask('${t.id}',-1)" title="Sposta su">▲</button>
+        <button class="reorder-btn" ${isLast?'disabled':''} onclick="event.stopPropagation();moveTask('${t.id}',1)" title="Sposta giù">▼</button>
+      </div>
+      <div class="task-check ${t.status==='done'?'checked':''}" onclick="event.stopPropagation();toggleDone('${t.id}')"></div>
+      <div class="task-card-title ${t.status==='done'?'done':''}">${escHtml(t.title)}</div>
+      ${tp?`<span class="type-badge" style="background:${tp.color}18;color:${tp.color};border:1px solid ${tp.color}30;flex-shrink:0">${escHtml(tp.name)}</span>`:''}
+    </div>
+    <div class="task-card-meta">
+      ${t.assignee?`<div class="avatar-sm" style="background:${avatarColor(t.assignee)}">${escHtml(initials(t.assignee))}</div><span class="assignee-name">${escHtml(t.assignee)}</span>`:''}
+      ${t.assignee&&t.due?`<div class="meta-sep"></div>`:''}
+      ${t.due?`<span class="date-chip ${overdue?'overdue':''}">📅 ${fmtDate(t.due)}</span>`:''}
+      <div class="meta-spacer"></div>
+      ${statusPill(t.status)}
+    </div>
+  </div>`;
+}
+
+function statusPill(s) {
+  const map = { todo:['To Do','todo'], inprogress:['In corso','inprogress'], done:['Fatto','done-status'] };
+  const [label,cls] = map[s]||map.todo;
+  return `<span class="status-pill ${cls}"><span class="pip"></span>${label}</span>`;
+}
+
+function toggleDone(id) {
+  const t = state.tasks.find(t=>t.id===id); if (!t) return;
+  t.status = t.status==='done' ? 'todo' : 'done';
+  save(); renderCurrentView(); updateBoardBadge();
+}
+
+// ── BOARD ──
+function renderBoard() {
+  renderFilterBar();
+  const el = document.getElementById('view-board');
+  if (!state.activeProjectId) { el.innerHTML=emptyState('📋','Nessun progetto',''); return; }
+  const cols = [{id:'todo',label:'To Do'},{id:'inprogress',label:'In corso'},{id:'done',label:'Fatto'}];
+  el.innerHTML = cols.map(col => {
+    const tasks = filteredSortedTasks(tasksByStatus(col.id));
+    return `<div class="board-col" data-col="${col.id}" ondragover="onDragOver(event,'${col.id}')" ondrop="onDrop(event,'${col.id}')" ondragleave="onDragLeave(event)">
+      <div class="board-col-header"><span class="col-title ${col.id}">${col.label}</span><span class="col-count">${tasks.length}</span></div>
+      <div class="board-cards" id="cards-${col.id}">${tasks.map(t=>cardHtml(t)).join('')}</div>
+      <button class="board-add" onclick="addTaskInStatus('${col.id}')"><span style="font-size:16px;color:var(--accent)">+</span> aggiungi task</button>
+    </div>`;
+  }).join('');
+  el.querySelectorAll('.board-card').forEach(card => {
+    card.draggable = true;
+    card.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain',card.dataset.id); setTimeout(()=>card.classList.add('dragging'),0); });
+    card.addEventListener('dragend', ()=>card.classList.remove('dragging'));
+    card.addEventListener('click', ()=>openTaskModal(card.dataset.id));
+  });
+
+  // ── Touch drag-and-drop per mobile ──
+  let touchDragId = null, touchClone = null, touchStartX = 0, touchStartY = 0, touchMoved = false;
+  el.querySelectorAll('.board-card').forEach(card => {
+    card.addEventListener('touchstart', e => {
+      touchMoved = false;
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      touchDragId = card.dataset.id;
+      // Long-press to initiate drag
+      card._touchTimer = setTimeout(() => {
+        touchClone = card.cloneNode(true);
+        touchClone.style.cssText = `position:fixed;z-index:9999;pointer-events:none;opacity:0.85;width:${card.offsetWidth}px;transform:scale(1.04);box-shadow:0 8px 24px rgba(0,0,0,0.2);border-radius:12px;`;
+        touchClone.style.left = (touchStartX - card.offsetWidth/2) + 'px';
+        touchClone.style.top  = (touchStartY - 30) + 'px';
+        document.body.appendChild(touchClone);
+        card.classList.add('dragging');
+      }, 350);
+    }, {passive:true});
+    card.addEventListener('touchmove', e => {
+      const dx = Math.abs(e.touches[0].clientX - touchStartX), dy = Math.abs(e.touches[0].clientY - touchStartY);
+      if (dx > 5 || dy > 5) touchMoved = true;
+      clearTimeout(card._touchTimer);
+      if (!touchClone) return;
+      e.preventDefault();
+      const tx = e.touches[0].clientX, ty = e.touches[0].clientY;
+      touchClone.style.left = (tx - touchClone.offsetWidth/2) + 'px';
+      touchClone.style.top  = (ty - 30) + 'px';
+      // Highlight target column
+      document.querySelectorAll('.board-cards').forEach(c=>c.classList.remove('drop-zone-active'));
+      const target = document.elementFromPoint(tx, ty);
+      const col = target && target.closest('[data-col]');
+      if (col) document.getElementById('cards-'+col.dataset.col)?.classList.add('drop-zone-active');
+    }, {passive:false});
+    card.addEventListener('touchend', e => {
+      clearTimeout(card._touchTimer);
+      if (touchClone) {
+        const tx = e.changedTouches[0].clientX, ty = e.changedTouches[0].clientY;
+        touchClone.remove(); touchClone = null;
+        card.classList.remove('dragging');
+        document.querySelectorAll('.board-cards').forEach(c=>c.classList.remove('drop-zone-active'));
+        const target = document.elementFromPoint(tx, ty);
+        const col = target && target.closest('[data-col]');
+        if (col && touchDragId) {
+          const t = state.tasks.find(t=>t.id===touchDragId);
+          if (t && t.status !== col.dataset.col) { t.status = col.dataset.col; save(); renderBoard(); updateBoardBadge(); }
+        }
+        touchDragId = null;
+      } else if (!touchMoved && touchDragId) {
+        openTaskModal(touchDragId);
+      }
+      touchDragId = null;
+    });
+  });
+}
+
+function cardHtml(t) {
+  const overdue = t.due && isOverdue(t.due) && t.status!=='done';
+  const tp = getTaskType(t.type||'');
+  // Position among same-status tasks in active project
+  const sameStatus = filteredSortedTasks(tasksByStatus(t.status));
+  const idx = sameStatus.findIndex(x=>x.id===t.id);
+  const isFirst = idx === 0;
+  const isLast = idx === sameStatus.length - 1;
+  return `<div class="board-card" data-id="${t.id}">
+    ${tp?`<div style="margin-bottom:6px"><span class="type-badge" style="background:${tp.color}18;color:${tp.color};border:1px solid ${tp.color}30">${escHtml(tp.name)}</span></div>`:''}
+    <div class="card-title ${t.status==='done'?'done':''}">${escHtml(t.title)}</div>
+    <div class="card-footer">
+      ${t.assignee?`<div class="avatar-sm" style="background:${avatarColor(t.assignee)}">${escHtml(initials(t.assignee))}</div>`:''}
+      ${t.due?`<span class="card-date ${overdue?'overdue':''}">${fmtDate(t.due)}</span>`:''}
+    </div>
+    <div class="board-reorder-handles">
+      <button class="board-reorder-btn" ${isFirst?'disabled':''} onclick="event.stopPropagation();moveTaskInStatus('${t.id}','${t.status}',-1)" title="Sposta su">▲</button>
+      <button class="board-reorder-btn" ${isLast?'disabled':''} onclick="event.stopPropagation();moveTaskInStatus('${t.id}','${t.status}',1)" title="Sposta giù">▼</button>
+    </div>
+  </div>`;
+}
+
+let dragOverCol = null;
+function onDragOver(e, colId) { e.preventDefault(); const col=document.getElementById('cards-'+colId); if (dragOverCol!==colId) { document.querySelectorAll('.board-cards').forEach(c=>c.classList.remove('drop-zone-active')); col&&col.classList.add('drop-zone-active'); dragOverCol=colId; } }
+function onDragLeave(e) {}
+function onDrop(e, colId) { e.preventDefault(); document.querySelectorAll('.board-cards').forEach(c=>c.classList.remove('drop-zone-active')); dragOverCol=null; const id=e.dataTransfer.getData('text/plain'); const t=state.tasks.find(t=>t.id===id); if(t){t.status=colId;save();renderBoard();updateBoardBadge();} }
+function addTaskInStatus(status) { const id=createTask('',status); openTaskModal(id); }
+
+// ── GANTT ──
+// Single-scroll table architecture:
+// One .gantt-scroll container scrolls both axes.
+// Label column cells use position:sticky left:0.
+// Because labels and day-cells live in the SAME table-row,
+// their heights are always identical — no overlap possible.
+
+function renderGantt() {
+  renderFilterBar();
+  const el = document.getElementById('view-gantt');
+  if (!state.activeProjectId) { el.innerHTML=emptyState('📊','Nessun progetto',''); return; }
+
+  // Fix 4: skip tasks with empty title
+  const all = filteredSortedTasks(activeTasks()).filter(t => t.title && t.title.trim() !== '');
+
+  // Compute date range
+  const tod = today();
+  let minDate = tod, maxDate = tod;
+  all.forEach(t => {
+    const s = t.start || t.due, d = t.due || t.start;
+    if (s && s < minDate) minDate = s;
+    if (d && d > maxDate) maxDate = d;
+  });
+  // Fix 2: always reach end of July
+  const todDate = new Date(tod + 'T00:00:00');
+  const julyEnd = new Date(todDate.getFullYear(), 6, 31).toISOString().slice(0,10);
+  const forcedEnd = julyEnd >= tod ? julyEnd : new Date(todDate.getFullYear()+1, 6, 31).toISOString().slice(0,10);
+  if (maxDate < forcedEnd) maxDate = forcedEnd;
+
+  const startD = addDays(minDate, -3);
+  const endD   = addDays(maxDate, 3);
+  const days   = daysBetween(startD, endD);
+  _ganttStartD = startD;
+
+  const labelW = Math.min(160, Math.max(110, window.innerWidth * 0.28));
+  const totalW = days * DAY_W;
+
+  // Fix 2: compute month spans for header
+  const monthSpans = [];
+  let curMKey = null, curSpan = 0, curMStart = 0;
+  for (let i = 0; i < days; i++) {
+    const date = new Date(addDays(startD, i) + 'T00:00:00');
+    const mKey = date.getFullYear() * 100 + date.getMonth();
+    if (mKey !== curMKey) {
+      if (curMKey !== null) {
+        const mDate = new Date(addDays(startD, curMStart) + 'T00:00:00');
+        monthSpans.push({ label: MONTHS_IT[mDate.getMonth()] + ' ' + mDate.getFullYear(), span: curSpan });
+      }
+      curMKey = mKey; curSpan = 1; curMStart = i;
+    } else { curSpan++; }
+  }
+  if (curMKey !== null) {
+    const mDate = new Date(addDays(startD, curMStart) + 'T00:00:00');
+    monthSpans.push({ label: MONTHS_IT[mDate.getMonth()] + ' ' + mDate.getFullYear(), span: curSpan });
+  }
+
+  // Build month header row (inside the timeline panel)
+  let monthHtml = '';
+  monthSpans.forEach(m => {
+    monthHtml += `<div class="gantt-head-month" style="width:${m.span*DAY_W}px;min-width:${m.span*DAY_W}px">${m.label}</div>`;
+  });
+
+  // Build day header row (inside the timeline panel)
+  let dayHtml = '';
+  for (let i = 0; i < days; i++) {
+    const d = addDays(startD, i), isT = d === tod;
+    const date = new Date(d + 'T00:00:00');
+    dayHtml += `<div class="gantt-head-day ${isT?'today':''}" style="width:${DAY_W}px;min-width:${DAY_W}px">
+      <span class="day-num">${date.getDate()}</span>
+      <span class="day-name">${date.toLocaleDateString('it-IT',{weekday:'short'})}</span>
+    </div>`;
+  }
+
+  // Build body rows
+  // Architecture: each row = flex row with a sticky label div + a relative timeline div
+  // The timeline div is position:relative and contains:
+  //   - a daygrid layer (absolute, pointer-events:none) for grid lines + today highlight
+  //   - the bar (absolute, positioned by left/width in px from startD)
+  // This means the bar's left value is ALWAYS relative to startD regardless of scroll. Fix 1.
+
+  let daygridHtml = '';
+  for (let i = 0; i < days; i++) {
+    const d = addDays(startD, i), isT = d === tod;
+    daygridHtml += `<div style="position:absolute;top:0;bottom:0;left:${i*DAY_W}px;width:${DAY_W}px;border-right:1px solid var(--border-light);${isT?'background:rgba(91,75,232,0.06)':''}"></div>`;
+  }
+
+  const bodyRowsHtml = all.map((t, rowIdx) => {
+    // Bar geometry
+    let barHtml = '';
+    if (t.start || t.due) {
+      const s = t.start || t.due, e = t.due || t.start;
+      const offsetDays = daysBetween(startD, s);
+      const spanDays   = Math.max(1, daysBetween(s, e) + 1);
+      const barLeft    = offsetDays * DAY_W + 2;
+      const barWidth   = spanDays * DAY_W - 4;
+      const tp = getTaskType(t.type || '');
+      let barBg, barShadow;
+      if (tp) {
+        barBg = `linear-gradient(135deg,${tp.color}dd,${tp.color})`;
+        barShadow = `0 2px 8px ${tp.color}55`;
+      } else if (t.status === 'done') {
+        barBg = 'linear-gradient(135deg,#c8c4be,#b0aca6)'; barShadow = 'none';
+      } else if (t.status === 'inprogress') {
+        barBg = 'linear-gradient(135deg,#e09000,var(--inprogress-color))'; barShadow = '0 2px 8px rgba(192,120,0,0.25)';
+      } else {
+        barBg = 'linear-gradient(135deg,var(--accent),#7b68f0)'; barShadow = '0 2px 8px rgba(91,75,232,0.28)';
+      }
+      // Fix 4: avatar dot with assignee initial
+      const avatarHtml = t.assignee
+        ? `<span class="gantt-bar-avatar" style="background:${avatarColor(t.assignee)}">${escHtml(initials(t.assignee))}</span>`
+        : '';
+      barHtml = `<div class="gantt-bar ${t.status==='done'?'done':t.status==='inprogress'?'inprogress':''}"
+        data-id="${t.id}"
+        style="left:${barLeft}px;width:${barWidth}px;background:${barBg};box-shadow:${barShadow};${t.status==='done'?'opacity:0.6':''}"
+        onclick="ganttBarClick(event,'${t.id}')"
+        onmousedown="ganttDragStart(event,'move','${t.id}')">
+        <div class="gantt-resize-handle left" onmousedown="ganttDragStart(event,'left','${t.id}')"></div>
+        ${avatarHtml}
+        <span class="gantt-bar-label">${escHtml(t.title)}</span>
+        <div class="gantt-resize-handle right" onmousedown="ganttDragStart(event,'right','${t.id}')"></div>
+      </div>`;
+    }
+
+    const isFirst = rowIdx === 0;
+    const isLast  = rowIdx === all.length - 1;
+    return `<div class="gantt-row" data-id="${t.id}" draggable="true">
+      <div class="gantt-label-cell" onclick="openTaskModal('${t.id}')">
+        <div class="gantt-row-handles" onclick="event.stopPropagation()">
+          <button class="gantt-row-btn" ${isFirst?'disabled':''} onclick="moveTask('${t.id}',-1)" title="Sposta su">▲</button>
+          <button class="gantt-row-btn" ${isLast?'disabled':''} onclick="moveTask('${t.id}',1)" title="Sposta giù">▼</button>
+        </div>
+        <span class="g-title ${t.status==='done'?'done':''}">${escHtml(t.title)}</span>
+      </div>
+      <div class="gantt-timeline" style="width:${totalW}px;min-width:${totalW}px">
+        <div class="gantt-daygrid" style="position:absolute;inset:0;pointer-events:none;overflow:hidden">${daygridHtml}</div>
+        ${barHtml}
+      </div>
+    </div>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="gantt-header-wrap" style="display:flex;flex-shrink:0;background:var(--surface2);border-bottom:1px solid var(--border);overflow:hidden" id="gantt-head-outer">
+      <div class="gantt-head-label-fixed" style="width:${labelW}px;min-width:${labelW}px;flex-shrink:0;border-right:1px solid var(--border);z-index:2">
+        <div style="height:28px;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 10px;font-size:10px;font-weight:700;color:var(--text-faint);text-transform:uppercase;letter-spacing:.06em"></div>
+        <div style="height:40px;display:flex;align-items:center;padding:0 10px;font-size:10px;font-weight:600;color:var(--text-faint);text-transform:uppercase;letter-spacing:.06em">Task</div>
+      </div>
+      <div id="gantt-head-scroll" style="overflow:hidden;flex:1">
+        <div style="width:${totalW}px;display:flex">${monthHtml}</div>
+        <div style="width:${totalW}px;display:flex">${dayHtml}</div>
+      </div>
+    </div>
+    <div class="gantt-scroll" id="gantt-scroll">
+      <div style="display:flex;flex-direction:column;min-width:${labelW + totalW}px">
+        ${bodyRowsHtml}
+      </div>
+    </div>`;
+
+  // Sync header scroll with body scroll (Fix 3 improvement)
+  const scroll = document.getElementById('gantt-scroll');
+  const headScroll = document.getElementById('gantt-head-scroll');
+  if (scroll && headScroll) {
+    scroll.addEventListener('scroll', () => { headScroll.scrollLeft = scroll.scrollLeft; }, {passive:true});
+    // Fix 6: scroll to today on open
+    const todayIdx = daysBetween(startD, tod);
+    scroll.scrollLeft = Math.max(0, todayIdx * DAY_W - (scroll.clientWidth - labelW) / 2 + DAY_W);
+  }
+
+  // Fix 7: mobile touch resize/move on gantt bars
+  ganttSetupTouchBars();
+  // Fix 3: row reorder via drag-and-drop
+  ganttSetupRowDrag();
+}
+
+let _ganttDrag = null, _ganttStartD = null;
+function ganttBarClick(e, id) { if (_ganttDrag && _ganttDrag.moved) { e.stopPropagation(); return; } openTaskModal(id); }
+function ganttDragStart(e, mode, taskId) {
+  e.stopPropagation(); e.preventDefault();
+  const t = state.tasks.find(t=>t.id===taskId); if(!t) return;
+  const bar = e.target.closest('.gantt-bar');
+  _ganttDrag = { mode, taskId, startX:e.clientX, origStart:t.start||t.due, origEnd:t.due||t.start, moved:false, bar, _newStart:null, _newEnd:null };
+  document.addEventListener('mousemove', ganttDragMove);
+  document.addEventListener('mouseup', ganttDragEnd);
+  document.body.style.cursor = mode==='move'?'grabbing':'ew-resize';
+  document.body.style.userSelect = 'none';
+}
+function ganttDragMove(e) {
+  if (!_ganttDrag) return;
+  const dx=e.clientX-_ganttDrag.startX, daysDelta=Math.round(dx/DAY_W);
+  if (Math.abs(dx)>4) _ganttDrag.moved=true;
+  let newStart=_ganttDrag.origStart, newEnd=_ganttDrag.origEnd;
+  if (_ganttDrag.mode==='move') { newStart=addDays(_ganttDrag.origStart,daysDelta); newEnd=addDays(_ganttDrag.origEnd,daysDelta); }
+  else if (_ganttDrag.mode==='left') { newStart=addDays(_ganttDrag.origStart,daysDelta); if(newStart>=newEnd)newStart=addDays(newEnd,-1); }
+  else if (_ganttDrag.mode==='right') { newEnd=addDays(_ganttDrag.origEnd,daysDelta); if(newEnd<=newStart)newEnd=addDays(newStart,1); }
+  if (_ganttStartD && _ganttDrag.bar) {
+    const offsetDays=daysBetween(_ganttStartD,newStart), spanDays=Math.max(1,daysBetween(newStart,newEnd)+1);
+    _ganttDrag.bar.style.left=(offsetDays*DAY_W+2)+'px';
+    _ganttDrag.bar.style.width=(spanDays*DAY_W-4)+'px';
+  }
+  _ganttDrag._newStart=newStart; _ganttDrag._newEnd=newEnd;
+}
+function ganttDragEnd() {
+  document.removeEventListener('mousemove',ganttDragMove);
+  document.removeEventListener('mouseup',ganttDragEnd);
+  document.body.style.cursor=''; document.body.style.userSelect='';
+  if (_ganttDrag && _ganttDrag.moved) {
+    const t=state.tasks.find(t=>t.id===_ganttDrag.taskId);
+    if (t && _ganttDrag._newStart) { t.start=_ganttDrag._newStart; t.due=_ganttDrag._newEnd; save(); }
+  }
+  _ganttDrag=null;
+}
+
+// Fix 7: Mobile touch for gantt bars — long press to move, press handles to resize
+let _gTouch = null;
+function ganttSetupTouchBars() {
+  const scroll = document.getElementById('gantt-scroll');
+  if (!scroll) return;
+  scroll.querySelectorAll('.gantt-bar').forEach(bar => {
+    const taskId = bar.dataset.id;
+
+    // Long-press on bar body → move
+    let _lt = null, _lMoved = false, _lStartX = 0, _lScrollX = 0;
+    bar.addEventListener('touchstart', e => {
+      if (e.target.classList.contains('gantt-resize-handle')) return; // handled below
+      _lMoved = false; _lStartX = e.touches[0].clientX;
+      _lScrollX = scroll.scrollLeft;
+      _lt = setTimeout(() => {
+        _startGanttTouchDrag(bar, taskId, 'move', e.touches[0].clientX);
+      }, 400);
+    }, {passive:true});
+    bar.addEventListener('touchmove', e => {
+      if (Math.abs(e.touches[0].clientX - _lStartX) > 8 || Math.abs(e.touches[0].clientY - _lStartX) > 8) _lMoved = true;
+      if (_lMoved) clearTimeout(_lt);
+    }, {passive:true});
+    bar.addEventListener('touchend', () => { clearTimeout(_lt); });
+
+    // Touch on resize handles → immediate resize
+    bar.querySelectorAll('.gantt-resize-handle').forEach(handle => {
+      handle.addEventListener('touchstart', e => {
+        e.stopPropagation();
+        const mode = handle.classList.contains('left') ? 'left' : 'right';
+        _startGanttTouchDrag(bar, taskId, mode, e.touches[0].clientX);
+      }, {passive:true});
+    });
+  });
+}
+
+function _startGanttTouchDrag(bar, taskId, mode, startClientX) {
+  const t = state.tasks.find(t=>t.id===taskId); if(!t) return;
+  const origStart = t.start||t.due, origEnd = t.due||t.start;
+  let _newStart = origStart, _newEnd = origEnd;
+  bar.style.opacity = '0.75';
+
+  function onMove(e) {
+    const dx = e.touches[0].clientX - startClientX;
+    const daysDelta = Math.round(dx / DAY_W);
+    if (mode==='move') { _newStart=addDays(origStart,daysDelta); _newEnd=addDays(origEnd,daysDelta); }
+    else if (mode==='left') { _newStart=addDays(origStart,daysDelta); if(_newStart>=_newEnd)_newStart=addDays(_newEnd,-1); }
+    else if (mode==='right') { _newEnd=addDays(origEnd,daysDelta); if(_newEnd<=_newStart)_newEnd=addDays(_newStart,1); }
+    if (_ganttStartD) {
+      const offsetDays=daysBetween(_ganttStartD,_newStart), spanDays=Math.max(1,daysBetween(_newStart,_newEnd)+1);
+      bar.style.left=(offsetDays*DAY_W+2)+'px';
+      bar.style.width=(spanDays*DAY_W-4)+'px';
+    }
+  }
+  function onEnd() {
+    bar.style.opacity = '';
+    document.removeEventListener('touchmove', onMove);
+    document.removeEventListener('touchend', onEnd);
+    const task = state.tasks.find(t=>t.id===taskId);
+    if (task) { task.start=_newStart; task.due=_newEnd; save(); }
+  }
+  document.addEventListener('touchmove', onMove, {passive:true});
+  document.addEventListener('touchend', onEnd);
+}
+
+// Fix 3: Drag-and-drop per riordinare le righe del Gantt
+let _ganttRowDragId = null;
+function ganttSetupRowDrag() {
+  const scroll = document.getElementById('gantt-scroll');
+  if (!scroll) return;
+  const rows = [...scroll.querySelectorAll('.gantt-row[data-id]')];
+  rows.forEach(row => {
+    row.addEventListener('dragstart', e => {
+      _ganttRowDragId = row.dataset.id;
+      e.dataTransfer.effectAllowed = 'move';
+      setTimeout(() => row.classList.add('gantt-dragging'), 0);
+    });
+    row.addEventListener('dragend', () => {
+      row.classList.remove('gantt-dragging');
+      scroll.querySelectorAll('.gantt-row').forEach(r => r.classList.remove('gantt-drag-over'));
+      _ganttRowDragId = null;
+    });
+    row.addEventListener('dragover', e => {
+      e.preventDefault();
+      if (!_ganttRowDragId || _ganttRowDragId === row.dataset.id) return;
+      scroll.querySelectorAll('.gantt-row').forEach(r => r.classList.remove('gantt-drag-over'));
+      row.classList.add('gantt-drag-over');
+    });
+    row.addEventListener('dragleave', () => row.classList.remove('gantt-drag-over'));
+    row.addEventListener('drop', e => {
+      e.preventDefault();
+      row.classList.remove('gantt-drag-over');
+      if (!_ganttRowDragId || _ganttRowDragId === row.dataset.id) return;
+      reorderTask(_ganttRowDragId, row.dataset.id);
+    });
+    // Mobile touch drag (up/down)
+    let tClone = null, tId = null, tTimer = null, tStartY = 0;
+    row.addEventListener('touchstart', ev => {
+      tId = row.dataset.id; tStartY = ev.touches[0].clientY;
+      tTimer = setTimeout(() => {
+        tClone = row.cloneNode(true);
+        tClone.style.cssText = `position:fixed;z-index:9999;pointer-events:none;opacity:0.8;
+          left:${row.getBoundingClientRect().left}px;top:${row.getBoundingClientRect().top}px;
+          width:${row.offsetWidth}px;background:var(--surface);
+          box-shadow:0 4px 20px rgba(0,0,0,0.18);`;
+        document.body.appendChild(tClone);
+        row.style.opacity = '0.35';
+      }, 400);
+    }, {passive:true});
+    row.addEventListener('touchmove', ev => {
+      clearTimeout(tTimer);
+      if (!tClone) return;
+      ev.preventDefault();
+      const ty = ev.touches[0].clientY;
+      tClone.style.top = (ty - 22) + 'px';
+      scroll.querySelectorAll('.gantt-row[data-id]').forEach(r => r.classList.remove('gantt-drag-over'));
+      const target = document.elementFromPoint(ev.touches[0].clientX, ty);
+      const tr = target && target.closest('.gantt-row[data-id]');
+      if (tr && tr !== row) tr.classList.add('gantt-drag-over');
+    }, {passive:false});
+    row.addEventListener('touchend', ev => {
+      clearTimeout(tTimer);
+      scroll.querySelectorAll('.gantt-row[data-id]').forEach(r => r.classList.remove('gantt-drag-over'));
+      if (tClone) {
+        tClone.remove(); tClone = null; row.style.opacity = '';
+        const ty = ev.changedTouches[0].clientY;
+        const target = document.elementFromPoint(ev.changedTouches[0].clientX, ty);
+        const tr = target && target.closest('.gantt-row[data-id]');
+        if (tr && tr !== row && tId) reorderTask(tId, tr.dataset.id);
+      }
+      tId = null;
+    });
+  });
+}
+function openStatusPicker() {
+  document.getElementById('status-panel-overlay').style.display='block';
+  document.getElementById('status-panel').style.display='block';
+}
+function closeStatusPicker() {
+  document.getElementById('status-panel-overlay').style.display='none';
+  document.getElementById('status-panel').style.display='none';
+}
+function pickStatus(s) {
+  document.getElementById('modal-status').value = s;
+  updateStatusDisplay(s);
+  closeStatusPicker();
+}
+function updateStatusDisplay(s) {
+  const map = { todo:['To Do','var(--todo-color)'], inprogress:['In corso','var(--inprogress-color)'], done:['Fatto','var(--done-color)'] };
+  const [label, color] = map[s]||map.todo;
+  document.getElementById('status-display').innerHTML = `<span style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0;display:inline-block"></span> ${label}`;
+}
+
+// ── ASSIGNEE PICKER ──
+const DEFAULT_ASSIGNEES = ['Federico','Stefano','Lorenzo','Giulia','Marco'];
+function getAssignees() {
+  const fromState = state.users && state.users.length > 0 ? state.users : DEFAULT_ASSIGNEES;
+  return [...new Set([...fromState, ...state.tasks.map(t=>t.assignee).filter(Boolean)])];
+}
+function openAssigneePicker() {
+  const cur = document.getElementById('modal-assignee').value;
+  const all = getAssignees();
+  const opts = document.getElementById('assignee-options');
+  opts.innerHTML = all.map(name => `<div class="dp-option ${name===cur?'active':''}" onclick="pickAssignee('${escHtml(name)}')">
+    <div class="avatar-sm opt-icon" style="background:${avatarColor(name)};width:32px;height:32px;font-size:11px">${escHtml(initials(name))}</div>
+    ${escHtml(name)}
+    ${name===cur?'<span style="margin-left:auto;color:var(--accent)">✓</span>':''}
+  </div>`).join('');
+  document.getElementById('assignee-custom-input').value='';
+  document.getElementById('assignee-panel-overlay').style.display='block';
+  document.getElementById('assignee-panel').style.display='block';
+}
+function closeAssigneePicker() {
+  document.getElementById('assignee-panel-overlay').style.display='none';
+  document.getElementById('assignee-panel').style.display='none';
+}
+function pickAssignee(name) {
+  document.getElementById('modal-assignee').value = name;
+  updateAssigneeDisplay(name);
+  closeAssigneePicker();
+}
+function confirmCustomAssignee() {
+  const val = document.getElementById('assignee-custom-input').value.trim();
+  if (val) pickAssignee(val);
+}
+function updateAssigneeDisplay(name) {
+  const el = document.getElementById('assignee-display');
+  if (name) {
+    el.className='field-value';
+    el.innerHTML=`<div class="avatar-sm" style="background:${avatarColor(name)};width:20px;height:20px;font-size:8px">${escHtml(initials(name))}</div>${escHtml(name)}`;
+  } else {
+    el.className='field-value placeholder';
+    el.textContent='—';
+  }
+}
+
+// ── DATE STORAGE ──
+let _dates = { start:'', due:'' };
+function getDateVal(field) { return _dates[field]||''; }
+function setDateVal(field, iso) {
+  _dates[field]=iso;
+  const display=document.getElementById(field+'-display');
+  const text=document.getElementById(field+'-text');
+  if (iso) { display.classList.remove('placeholder'); text.className='field-value'; text.textContent=fmtDate(iso); }
+  else { display.classList.add('placeholder'); text.className='field-value placeholder'; text.textContent='Seleziona'; }
+  dpUpdateRangeHint();
+}
+
+// ── DATE PICKER ──
+let dpField=null, dpYear, dpMonth;
+function openDatePicker(field, cardEl) {
+  dpField=field;
+  const existing=_dates[field];
+  const ref=existing?new Date(existing+'T00:00:00'):new Date();
+  dpYear=ref.getFullYear(); dpMonth=ref.getMonth();
+  dpRender();
+  document.getElementById('datepicker-popup').style.display='block';
+  document.getElementById('dp-overlay').style.display='block';
+}
+function dpDismiss() {
+  document.getElementById('datepicker-popup').style.display='none';
+  document.getElementById('dp-overlay').style.display='none';
+  dpField=null;
+}
+function dpNavigate(dir) {
+  dpMonth+=dir;
+  if (dpMonth>11){dpMonth=0;dpYear++;}
+  if (dpMonth<0){dpMonth=11;dpYear--;}
+  dpRender();
+}
+const DAYS_IT=['Lu','Ma','Me','Gi','Ve','Sa','Do'];
+function dpRender() {
+  document.getElementById('dp-month-year').textContent=MONTHS_IT[dpMonth]+' '+dpYear;
+  const grid=document.getElementById('dp-grid');
+  const todayIso=today(), selectedIso=dpField?_dates[dpField]||'':'', startIso=_dates.start||'', dueIso=_dates.due||'';
+  let html=DAYS_IT.map(d=>`<div class="dp-dow">${d}</div>`).join('');
+  const first=new Date(dpYear,dpMonth,1);
+  let startDow=first.getDay(); startDow=startDow===0?6:startDow-1;
+  const daysInMonth=new Date(dpYear,dpMonth+1,0).getDate();
+  const prevDays=new Date(dpYear,dpMonth,0).getDate();
+  for (let i=0;i<startDow;i++){const d=prevDays-startDow+1+i;html+=`<button class="dp-day other-month" onclick="dpPickDay(${dpYear},${dpMonth-1<0?11:dpMonth-1},${d},${dpMonth-1<0?dpYear-1:dpYear})">${d}</button>`;}
+  for (let d=1;d<=daysInMonth;d++){const iso=`${dpYear}-${String(dpMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;let cls='dp-day';if(iso===todayIso)cls+=' today';if(iso===selectedIso)cls+=' selected';else if(startIso&&dueIso&&(iso===startIso||iso===dueIso))cls+=' selected';else if(startIso&&dueIso&&iso>startIso&&iso<dueIso)cls+=' in-range';html+=`<button class="${cls}" onclick="dpPickDay(${dpYear},${dpMonth},${d},${dpYear})">${d}</button>`;}
+  const totalCells=startDow+daysInMonth, remaining=totalCells%7===0?0:7-(totalCells%7);
+  for (let d=1;d<=remaining;d++){html+=`<button class="dp-day other-month" onclick="dpPickDay(${dpYear},${dpMonth+1>11?0:dpMonth+1},${d},${dpMonth+1>11?dpYear+1:dpYear})">${d}</button>`;}
+  grid.innerHTML=html;
+}
+function dpPickDay(year,month,day,actualYear){const iso=`${actualYear}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;if(dpField)setDateVal(dpField,iso);dpDismiss();}
+function dpSelectToday(){if(dpField)setDateVal(dpField,today());dpDismiss();}
+function dpClear(){if(dpField)setDateVal(dpField,'');dpDismiss();}
+function dpUpdateRangeHint(){if(document.getElementById('datepicker-popup').style.display!=='none')dpRender();}
+
+// ── TASK MODAL ──
+function openTaskModal(taskId) {
+  if (!state.activeProjectId) { openProjectModal(); return; }
+  editingTaskId=taskId;
+  const deleteBtn=document.getElementById('modal-delete-btn');
+  if (taskId) {
+    const t=state.tasks.find(t=>t.id===taskId); if(!t) return;
+    document.getElementById('modal-title').value=t.title;
+    document.getElementById('modal-desc').value=t.description||'';
+    document.getElementById('modal-status').value=t.status;
+    document.getElementById('modal-assignee').value=t.assignee||'';
+    document.getElementById('modal-type').value=t.type||'';
+    updateStatusDisplay(t.status);
+    updateAssigneeDisplay(t.assignee||'');
+    updateTypeDisplay(t.type||'');
+    _dates.start=t.start||''; _dates.due=t.due||'';
+    setDateVal('start',t.start||''); setDateVal('due',t.due||'');
+    document.getElementById('modal-check').classList.toggle('checked',t.status==='done');
+    deleteBtn.style.display='';
+  } else {
+    document.getElementById('modal-title').value='';
+    document.getElementById('modal-desc').value='';
+    document.getElementById('modal-status').value='todo';
+    document.getElementById('modal-assignee').value='';
+    document.getElementById('modal-type').value='';
+    updateStatusDisplay('todo'); updateAssigneeDisplay(''); updateTypeDisplay('');
+    _dates.start=''; _dates.due='';
+    setDateVal('start',''); setDateVal('due','');
+    document.getElementById('modal-check').classList.remove('checked');
+    deleteBtn.style.display='none'; editingTaskId=null;
+  }
+  setTimeout(()=>{ ['modal-title','modal-desc'].forEach(id=>{const el=document.getElementById(id);el.style.height='auto';el.style.height=el.scrollHeight+'px';}); },0);
+  document.getElementById('task-modal-overlay').style.display='flex';
+  // Non focalizzare automaticamente su mobile (evita apertura tastiera)
+  if (!('ontouchstart' in window)) {
+    setTimeout(()=>document.getElementById('modal-title').focus(),100);
+  }
+}
+function closeTaskModal(){document.getElementById('task-modal-overlay').style.display='none';document.getElementById('datepicker-popup').style.display='none';document.getElementById('dp-overlay').style.display='none';editingTaskId=null;dpField=null;}
+function handleOverlayClick(e){if(e.target===document.getElementById('task-modal-overlay'))closeTaskModal();}
+function toggleModalDone(){const check=document.getElementById('modal-check');check.classList.toggle('checked');document.getElementById('modal-status').value=check.classList.contains('checked')?'done':'todo';updateStatusDisplay(document.getElementById('modal-status').value);}
+function saveTask(){
+  const title=document.getElementById('modal-title').value.trim();
+  if (!title){document.getElementById('modal-title').focus();return;}
+  if (editingTaskId){const t=state.tasks.find(t=>t.id===editingTaskId);if(t){t.title=title;t.description=document.getElementById('modal-desc').value.trim();t.status=document.getElementById('modal-status').value;t.assignee=document.getElementById('modal-assignee').value.trim();t.type=document.getElementById('modal-type').value;t.start=_dates.start||'';t.due=_dates.due||'';}}
+  else{state.tasks.push({id:uid(),projectId:state.activeProjectId,title,description:document.getElementById('modal-desc').value.trim(),status:document.getElementById('modal-status').value,assignee:document.getElementById('modal-assignee').value.trim(),type:document.getElementById('modal-type').value,start:_dates.start||'',due:_dates.due||''});}
+  save();closeTaskModal();renderCurrentView();updateBoardBadge();
+}
+function deleteCurrentTask(){if(!editingTaskId)return;state.tasks=state.tasks.filter(t=>t.id!==editingTaskId);save();closeTaskModal();renderCurrentView();updateBoardBadge();}
+function createTask(title='',status='todo'){const t={id:uid(),projectId:state.activeProjectId,title,description:'',status,assignee:'',type:'',start:'',due:''};state.tasks.push(t);save();return t.id;}
+
+// ── PROJECT MODAL ──
+function openProjectModal(){document.getElementById('project-name-input').value='';document.getElementById('project-modal-overlay').style.display='flex';setTimeout(()=>document.getElementById('project-name-input').focus(),100);}
+function closeProjectModal(){document.getElementById('project-modal-overlay').style.display='none';}
+function handleProjectOverlayClick(e){if(e.target===document.getElementById('project-modal-overlay'))closeProjectModal();}
+function saveProject(){
+  const name=document.getElementById('project-name-input').value.trim();
+  if (!name){document.getElementById('project-name-input').focus();return;}
+  const p={id:uid(),name};
+  state.projects.push(p);state.activeProjectId=p.id;
+  save();closeProjectModal();updateHeader();renderCurrentView();updateBoardBadge();
+}
+
+// ── CONFIRM ──
+let pendingAction=null;
+function showConfirm(title,body,action){pendingAction=action;document.getElementById('confirm-title').textContent=title;document.getElementById('confirm-body').textContent=body;document.getElementById('confirm-overlay').style.display='flex';}
+function closeConfirm(){pendingAction=null;document.getElementById('confirm-overlay').style.display='none';}
+function confirmAction(){if(pendingAction)pendingAction();closeConfirm();}
+function confirmDeleteProject(projectId){const proj=state.projects.find(p=>p.id===projectId);if(!proj)return;const taskCount=state.tasks.filter(t=>t.projectId===projectId).length;const body=taskCount>0?`Verranno eliminati anche i ${taskCount} task associati.`:'Azione irreversibile.';showConfirm(`Elimina "${proj.name}"?`,body,()=>deleteProject(projectId));}
+function deleteProject(projectId){state.projects=state.projects.filter(p=>p.id!==projectId);state.tasks=state.tasks.filter(t=>t.projectId!==projectId);if(state.activeProjectId===projectId)state.activeProjectId=state.projects.length?state.projects[0].id:null;save();updateHeader();renderCurrentView();updateBoardBadge();}
+function confirmResetAll(){showConfirm('Reset tutti i dati?','Tutti i progetti e task verranno eliminati. Azione irreversibile.',resetAllData);}
+function resetAllData(){
+  try{localStorage.removeItem('flow_v3');localStorage.removeItem('flow_v2');}catch(e){}
+  if (_rtdbAvailable) fetch(RTDB_NODE, { method:'DELETE' }).catch(()=>{});
+  state={projects:[],tasks:[],activeProjectId:null,currentView:'list',users:[],taskTypes:[]};
+  init();
+}
+
+// ── CONTEXT MENU ──
+let ctxMenu=null;
+function showCtxMenu(e,projectId){closeCtxMenu();const menu=document.createElement('div');menu.className='ctx-menu';menu.style.left=e.clientX+'px';menu.style.top=e.clientY+'px';menu.innerHTML=`<div class="ctx-item" onclick="closeCtxMenu();confirmDeleteProject('${projectId}')">🗑 Elimina progetto</div>`;document.body.appendChild(menu);ctxMenu=menu;setTimeout(()=>document.addEventListener('click',closeCtxMenu,{once:true}),0);}
+function closeCtxMenu(){if(ctxMenu){ctxMenu.remove();ctxMenu=null;}}
+
+// ── KEYBOARD ──
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){closeTaskModal();closeProjectModal();closeRenameProject();closeConfirm();closeCtxMenu();closeStatusPicker();closeAssigneePicker();dpDismiss();closeProjectsPanel();closeSettingsPanel();closeTypePicker();}
+  if((e.metaKey||e.ctrlKey)&&e.key==='Enter'){if(document.getElementById('task-modal-overlay').style.display==='flex')saveTask();if(document.getElementById('project-modal-overlay').style.display==='flex')saveProject();if(document.getElementById('rename-project-overlay').style.display==='flex')saveRenameProject();}
+});
+
+// ── SETTINGS PANEL ──
+const TYPE_PALETTE = ['#5b4be8','#3b67e8','#1a8f4a','#c07800','#d93025','#0891b2','#c0287a','#7b4f00','#6b21a8','#0f766e','#b45309','#be185d'];
+let _selectedNewTypeColor = TYPE_PALETTE[0];
+
+function openSettingsPanel() {
+  renderSettingsPanel();
+  renderNewTypeColorPicker();
+  document.getElementById('settings-panel-overlay').style.display='block';
+  document.getElementById('settings-panel').style.display='block';
+}
+function closeSettingsPanel() {
+  document.getElementById('settings-panel-overlay').style.display='none';
+  document.getElementById('settings-panel').style.display='none';
+}
+
+function renderSettingsPanel() {
+  // Users
+  const users = state.users && state.users.length > 0 ? state.users : [];
+  const ul = document.getElementById('settings-users-list');
+  if (users.length === 0) {
+    ul.innerHTML = `<div style="padding:6px 20px 10px;font-size:12px;color:var(--text-faint)">Nessun utente aggiunto — viene usata la lista predefinita.</div>`;
+  } else {
+    ul.innerHTML = users.map((u,i) => `
+      <div class="settings-item">
+        <div class="avatar-sm" style="background:${avatarColor(u)};width:28px;height:28px;font-size:10px;flex-shrink:0">${escHtml(initials(u))}</div>
+        <span class="settings-item-label">${escHtml(u)}</span>
+        <button class="settings-remove-btn" onclick="removeUser(${i})">✕</button>
+      </div>`).join('');
+  }
+
+  // Task types
+  const types = state.taskTypes || [];
+  const tl = document.getElementById('settings-types-list');
+  if (types.length === 0) {
+    tl.innerHTML = `<div style="padding:6px 20px 10px;font-size:12px;color:var(--text-faint)">Nessuna tipologia aggiunta.</div>`;
+  } else {
+    tl.innerHTML = types.map((tp,i) => `
+      <div class="settings-item">
+        <div style="width:14px;height:14px;border-radius:50%;background:${tp.color};flex-shrink:0"></div>
+        <span class="settings-item-label">${escHtml(tp.name)}</span>
+        <button class="settings-remove-btn" onclick="removeTaskType(${i})">✕</button>
+      </div>`).join('');
+  }
+}
+
+function renderNewTypeColorPicker() {
+  const row = document.getElementById('new-type-color-picker');
+  row.innerHTML = TYPE_PALETTE.map(c => `
+    <div class="color-swatch ${c===_selectedNewTypeColor?'selected':''}"
+      style="background:${c}"
+      onclick="selectNewTypeColor('${c}')"></div>`).join('');
+}
+function selectNewTypeColor(c) {
+  _selectedNewTypeColor = c;
+  renderNewTypeColorPicker();
+}
+
+// ── USER MANAGEMENT ──
+function addUser() {
+  const input = document.getElementById('new-user-input');
+  const name = input.value.trim();
+  if (!name) { input.focus(); return; }
+  if (!state.users) state.users = [];
+  if (state.users.includes(name)) { input.value=''; return; }
+  state.users.push(name);
+  input.value = '';
+  save();
+  renderSettingsPanel();
+}
+function removeUser(idx) {
+  if (!state.users) return;
+  state.users.splice(idx, 1);
+  save();
+  renderSettingsPanel();
+}
+
+// ── TASK TYPE MANAGEMENT ──
+function addTaskType() {
+  const input = document.getElementById('new-type-name-input');
+  const name = input.value.trim();
+  if (!name) { input.focus(); return; }
+  if (!state.taskTypes) state.taskTypes = [];
+  if (state.taskTypes.find(tp=>tp.name===name)) { input.value=''; return; }
+  state.taskTypes.push({ id: uid(), name, color: _selectedNewTypeColor });
+  input.value = '';
+  _selectedNewTypeColor = TYPE_PALETTE[Math.floor(Math.random()*TYPE_PALETTE.length)];
+  save();
+  renderSettingsPanel();
+  renderNewTypeColorPicker();
+}
+function removeTaskType(idx) {
+  if (!state.taskTypes) return;
+  state.taskTypes.splice(idx, 1);
+  save();
+  renderSettingsPanel();
+}
+
+// ── TYPE PICKER ──
+function openTypePicker() {
+  const cur = document.getElementById('modal-type').value;
+  const types = state.taskTypes || [];
+  const opts = document.getElementById('type-options');
+  if (types.length === 0) {
+    opts.innerHTML = `<div style="padding:12px 20px;font-size:13px;color:var(--text-faint)">Nessuna tipologia. Aggiungile dalle ⚙️ Impostazioni.</div>`;
+  } else {
+    opts.innerHTML = types.map(tp => `
+      <div class="dp-option ${tp.id===cur?'active':''}" onclick="pickType('${tp.id}')">
+        <div class="opt-icon" style="background:${tp.color}20;border:1px solid ${tp.color}40">
+          <span style="width:10px;height:10px;border-radius:50%;background:${tp.color};display:inline-block"></span>
+        </div>
+        ${escHtml(tp.name)}
+        ${tp.id===cur?'<span style="margin-left:auto;color:var(--accent)">✓</span>':''}
+      </div>`).join('');
+  }
+  document.getElementById('type-panel-overlay').style.display='block';
+  document.getElementById('type-panel').style.display='block';
+}
+function closeTypePicker() {
+  document.getElementById('type-panel-overlay').style.display='none';
+  document.getElementById('type-panel').style.display='none';
+}
+function pickType(id) {
+  document.getElementById('modal-type').value = id;
+  updateTypeDisplay(id);
+  closeTypePicker();
+}
+function updateTypeDisplay(id) {
+  const el = document.getElementById('type-display');
+  const tp = (state.taskTypes||[]).find(t=>t.id===id);
+  if (tp) {
+    el.className='field-value';
+    el.innerHTML=`<span style="width:10px;height:10px;border-radius:50%;background:${tp.color};flex-shrink:0;display:inline-block"></span> ${escHtml(tp.name)}`;
+  } else {
+    el.className='field-value placeholder';
+    el.textContent='—';
+  }
+}
+function getTaskType(id) { return (state.taskTypes||[]).find(t=>t.id===id)||null; }
+
+// ── FILTER & SORT ──
+function renderFilterBar() {
+  const bar = document.getElementById('assignee-chips');
+  if (!bar) return;
+  const assignees = [...new Set(activeTasks().map(t=>t.assignee).filter(Boolean))];
+  let html = `<div class="filter-chip ${_filterAssignee===''?'active':''}" onclick="setAssigneeFilter('')">Tutti</div>`;
+  assignees.forEach(a => {
+    const col = avatarColor(a);
+    html += `<div class="filter-chip ${_filterAssignee===a?'active':''}" onclick="setAssigneeFilter('${escHtml(a)}')">
+      <span class="chip-dot" style="background:${col}"></span>${escHtml(a)}</div>`;
+  });
+  bar.innerHTML = html;
+}
+
+function setAssigneeFilter(name) {
+  _filterAssignee = name;
+  renderCurrentView();
+  renderFilterBar();
+}
+
+function applySortFilter() {
+  renderCurrentView();
+  renderFilterBar();
+}
+
+function filteredSortedTasks(tasks) {
+  return _filterAssignee ? tasks.filter(t => t.assignee === _filterAssignee) : tasks;
+}
+
+// ── MANUAL REORDER (drag up/down in list view) ──
+let _listDrag = null;
+
+function enableListReorder() {
+  const el = document.getElementById('view-list');
+  if (!el) return;
+  const cards = [...el.querySelectorAll('.task-card[data-id]')];
+  cards.forEach(card => {
+    // Desktop: drag events
+    card.draggable = true;
+    card.addEventListener('dragstart', e => {
+      _listDrag = card.dataset.id;
+      setTimeout(() => card.style.opacity = '0.35', 0);
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    card.addEventListener('dragend', () => { card.style.opacity = ''; _listDrag = null; });
+    card.addEventListener('dragover', e => {
+      e.preventDefault();
+      if (!_listDrag || _listDrag === card.dataset.id) return;
+      card.style.outline = '2px solid var(--accent)';
+      card.style.outlineOffset = '2px';
+    });
+    card.addEventListener('dragleave', () => { card.style.outline = ''; card.style.outlineOffset = ''; });
+    card.addEventListener('drop', e => {
+      e.preventDefault();
+      card.style.outline = ''; card.style.outlineOffset = '';
+      if (!_listDrag || _listDrag === card.dataset.id) return;
+      reorderTask(_listDrag, card.dataset.id);
+    });
+
+    // Mobile: touch long-press drag
+    let tClone = null, tId = null, tMoved = false, tTimer = null, tStartY = 0;
+    card.addEventListener('touchstart', e => {
+      tMoved = false; tId = card.dataset.id; tStartY = e.touches[0].clientY;
+      tTimer = setTimeout(() => {
+        tClone = card.cloneNode(true);
+        tClone.style.cssText = `position:fixed;z-index:9999;pointer-events:none;opacity:0.85;width:${card.offsetWidth}px;
+          transform:scale(1.03);box-shadow:0 8px 24px rgba(0,0,0,0.18);border-radius:14px;left:${card.getBoundingClientRect().left}px;top:${card.getBoundingClientRect().top}px`;
+        document.body.appendChild(tClone);
+        card.style.opacity = '0.35';
+      }, 380);
+    }, {passive:true});
+    card.addEventListener('touchmove', e => {
+      if (Math.abs(e.touches[0].clientY - tStartY) > 6) tMoved = true;
+      clearTimeout(tTimer);
+      if (!tClone) return;
+      e.preventDefault();
+      const ty = e.touches[0].clientY;
+      tClone.style.top = (ty - 30) + 'px';
+      // highlight target
+      el.querySelectorAll('.task-card[data-id]').forEach(c => { c.style.outline=''; c.style.outlineOffset=''; });
+      const target = document.elementFromPoint(e.touches[0].clientX, ty);
+      const tc = target && target.closest('.task-card[data-id]');
+      if (tc && tc !== card) { tc.style.outline='2px solid var(--accent)'; tc.style.outlineOffset='2px'; }
+    }, {passive:false});
+    card.addEventListener('touchend', e => {
+      clearTimeout(tTimer);
+      el.querySelectorAll('.task-card[data-id]').forEach(c => { c.style.outline=''; c.style.outlineOffset=''; });
+      if (tClone) {
+        tClone.remove(); tClone = null; card.style.opacity = '';
+        const ty = e.changedTouches[0].clientY;
+        const target = document.elementFromPoint(e.changedTouches[0].clientX, ty);
+        const tc = target && target.closest('.task-card[data-id]');
+        if (tc && tc !== card && tId) reorderTask(tId, tc.dataset.id);
+      }
+      tId = null;
+    });
+  });
+}
+
+function reorderTask(dragId, targetId) {
+  const proj = state.activeProjectId;
+  const projectTasks = state.tasks.filter(t => t.projectId === proj);
+  const others = state.tasks.filter(t => t.projectId !== proj);
+  const fromIdx = projectTasks.findIndex(t => t.id === dragId);
+  const toIdx   = projectTasks.findIndex(t => t.id === targetId);
+  if (fromIdx < 0 || toIdx < 0) return;
+  const [moved] = projectTasks.splice(fromIdx, 1);
+  projectTasks.splice(toIdx, 0, moved);
+  state.tasks = [...others, ...projectTasks];
+  save();
+  renderCurrentView();
+}
+
+// Move a task up (-1) or down (+1) among ALL active tasks (syncs across all views)
+function moveTask(taskId, dir) {
+  const proj = state.activeProjectId;
+  const projectTasks = state.tasks.filter(t => t.projectId === proj);
+  const others = state.tasks.filter(t => t.projectId !== proj);
+  const idx = projectTasks.findIndex(t => t.id === taskId);
+  if (idx < 0) return;
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= projectTasks.length) return;
+  const [moved] = projectTasks.splice(idx, 1);
+  projectTasks.splice(newIdx, 0, moved);
+  state.tasks = [...others, ...projectTasks];
+  save();
+  renderCurrentView();
+}
+
+// Move a task up (-1) or down (+1) within its status column (board view)
+// This also updates the global order so list & gantt reflect it
+function moveTaskInStatus(taskId, status, dir) {
+  const proj = state.activeProjectId;
+  const projectTasks = state.tasks.filter(t => t.projectId === proj);
+  const others = state.tasks.filter(t => t.projectId !== proj);
+  // Find all tasks of same status in project order
+  const sameStatus = projectTasks.filter(t => t.status === status);
+  const localIdx = sameStatus.findIndex(t => t.id === taskId);
+  if (localIdx < 0) return;
+  const newLocalIdx = localIdx + dir;
+  if (newLocalIdx < 0 || newLocalIdx >= sameStatus.length) return;
+  // Perform the swap in the sameStatus array
+  const [moved] = sameStatus.splice(localIdx, 1);
+  sameStatus.splice(newLocalIdx, 0, moved);
+  // Rebuild projectTasks preserving non-status tasks in their relative positions,
+  // replacing same-status slots with the reordered array
+  let sameIdx = 0;
+  const rebuilt = projectTasks.map(t => {
+    if (t.status === status) return sameStatus[sameIdx++];
+    return t;
+  });
+  state.tasks = [...others, ...rebuilt];
+  save();
+  renderCurrentView();
+}
+
+// ── INIT ──
+async function init(){
+  await load();
+  startRealtimeSync();
+  if (state.projects.length===0){
+    const p1={id:uid(),name:'Lancio prodotto'},p2={id:uid(),name:'Sito web'};
+    state.projects=[p1,p2];state.activeProjectId=p1.id;
+    state.users=['Federico','Stefano','Lorenzo','Giulia','Marco'];
+    state.taskTypes=[
+      {id:uid(),name:'Feature',color:'#5b4be8'},
+      {id:uid(),name:'Bug',color:'#d93025'},
+      {id:uid(),name:'Design',color:'#c0287a'},
+      {id:uid(),name:'Marketing',color:'#c07800'},
+    ];
+    const t=today();
+    state.tasks=[
+      {id:uid(),projectId:p1.id,title:'Definire roadmap Q2',description:'Elencare milestone principali.',status:'done',assignee:'Federico',start:addDays(t,-14),due:addDays(t,-7)},
+      {id:uid(),projectId:p1.id,title:'Brief copywriter',description:'',status:'inprogress',assignee:'Stefano',start:addDays(t,-5),due:addDays(t,3)},
+      {id:uid(),projectId:p1.id,title:'Preparare deck investitori',description:'Slide deck 10 pagine per round seed.',status:'inprogress',assignee:'Lorenzo',start:addDays(t,-2),due:addDays(t,5)},
+      {id:uid(),projectId:p1.id,title:'Setup analytics',description:'',status:'todo',assignee:'',start:'',due:addDays(t,8)},
+      {id:uid(),projectId:p1.id,title:'Press release lancio',description:'',status:'todo',assignee:'Stefano',start:addDays(t,4),due:addDays(t,12)},
+      {id:uid(),projectId:p1.id,title:'Campagna social',description:'',status:'todo',assignee:'',start:addDays(t,6),due:addDays(t,18)},
+      {id:uid(),projectId:p2.id,title:'Design homepage',description:'',status:'inprogress',assignee:'Lorenzo',start:addDays(t,-3),due:addDays(t,4)},
+      {id:uid(),projectId:p2.id,title:'Sviluppo frontend',description:'',status:'todo',assignee:'Federico',start:addDays(t,5),due:addDays(t,20)},
+      {id:uid(),projectId:p2.id,title:'SEO on-page',description:'',status:'todo',assignee:'',start:'',due:''},
+    ];
+    save();
+  }
+  updateHeader();
+  switchView(state.currentView||'list');
+}
+
+init();
+</script>
+</body>
+</html>
