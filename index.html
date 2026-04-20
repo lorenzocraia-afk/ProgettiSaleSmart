@@ -175,15 +175,21 @@ body {
     display: flex;
     align-items: stretch;
     justify-content: space-around;
-    height: 56px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: calc(56px + var(--safe-bottom));
     padding-bottom: var(--safe-bottom);
     background: rgba(255,255,255,0.97);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-top: 1px solid var(--border);
-    flex-shrink: 0;
-    order: 99; /* always at bottom */
-    z-index: 10;
+    z-index: 50;
+  }
+  /* push content up so it's not hidden behind the fixed tab bar */
+  #content {
+    padding-bottom: calc(56px + var(--safe-bottom));
   }
 }
 .mob-tab-btn {
@@ -295,7 +301,7 @@ body {
   border: 1px solid var(--border);
   border-left: 3px solid var(--card-proj-color, var(--border));
   border-radius: var(--radius);
-  padding: 12px 14px 10px 12px;
+  padding: 10px 14px 10px 12px;
   cursor: pointer;
   transition: background 0.1s ease, box-shadow 0.1s ease;
   display: flex;
@@ -303,7 +309,6 @@ body {
   gap: 6px;
   flex-shrink: 0;
   position: relative;
-  overflow: hidden;
   word-break: break-word;
   min-width: 0;
 }
@@ -370,20 +375,16 @@ body {
 }
 .board-reorder-btn:active { background: var(--accent-dim); color: var(--accent); transform: scale(0.9); }
 .board-reorder-btn:disabled { opacity: 0.2; cursor: default; }
-
-.task-card::before {
-  content: '';
-  position: absolute;
-  right: 12px; top: 15px;
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: var(--border);
-  flex-shrink: 0;
+@media (max-width: 599px) {
+  .board-reorder-handles { display: none; }
 }
-.task-card.status-todo::before       { background: var(--todo-color); }
-.task-card.status-inprogress::before { background: var(--inprogress-color); }
-.task-card.status-done::before       { background: var(--done-color); }
-.task-card.status-done { opacity: 0.6; }
+
+.task-card::before { display: none; }
+/* Left border = project color (always visible) */
+/* Right border = status color (thin accent) */
+.task-card.status-todo       { border-right: 2px solid var(--todo-color); }
+.task-card.status-inprogress { border-right: 2px solid var(--inprogress-color); }
+.task-card.status-done       { border-right: 2px solid var(--done-color); opacity: 0.6; }
 .task-card:active { background: var(--surface2); }
 
 .task-card-top { display: flex; align-items: flex-start; gap: 12px; }
