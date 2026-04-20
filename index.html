@@ -4154,16 +4154,7 @@ function moveTaskInStatus(taskId, status, dir) {
 async function init(){
   await load();
   startRealtimeSync();
-  // Inserisce dati demo SOLO se nessuna fonte ha dati reali
-  // (Firebase vuoto E localStorage vuoto → primo avvio assoluto)
-  if (state.projects.length === 0 && !_rtdbAvailable) {
-    const lsRaw = localStorage.getItem('flow_v3_p2') || localStorage.getItem('flow_v3') || localStorage.getItem('flow_v2');
-    if (lsRaw) {
-      // localStorage ha dati ma _applyState non li ha caricati — riprova
-      try { const p = JSON.parse(lsRaw); if (p?.projects?.length) { _applyState(p, false); } } catch(_) {}
-    }
-  }
-  if (state.projects.length === 0){
+  if (state.projects.length===0){
     const p1={id:uid(),name:'Lancio prodotto'},p2={id:uid(),name:'Sito web'};
     state.projects=[p1,p2];state.activeProjectId=p1.id;
     state.users=['Federico','Stefano','Lorenzo','Giulia','Marco'];
