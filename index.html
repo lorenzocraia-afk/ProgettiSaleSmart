@@ -2206,6 +2206,25 @@ input, textarea, select, button {
   </div>
 
   <div class="dp-sep" style="margin-top:8px"></div>
+
+  <!-- 5. BACKUP -->
+  <div class="settings-section-title">
+    <svg viewBox="0 0 16 16" fill="none" width="13" height="13" stroke="currentColor" stroke-width="1.5" style="flex-shrink:0"><path d="M8 2v8M5 7l3 3 3-3"/><path d="M3 12h10"/></svg>
+    Backup dati
+  </div>
+  <div style="padding:8px 20px 12px;display:flex;gap:10px;flex-wrap:wrap">
+    <button onclick="exportData()" style="display:inline-flex;align-items:center;gap:7px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 16px;font-family:var(--sans);font-size:13px;font-weight:500;color:var(--text);cursor:pointer;transition:background .1s" onmouseenter="this.style.background='var(--surface3)'" onmouseleave="this.style.background='var(--surface2)'">
+      <svg viewBox="0 0 16 16" fill="none" width="14" height="14" stroke="currentColor" stroke-width="1.5"><path d="M8 2v8M5 7l3 3 3-3"/><path d="M3 12h10"/></svg>
+      Esporta
+    </button>
+    <button onclick="document.getElementById('import-file-input').click()" style="display:inline-flex;align-items:center;gap:7px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 16px;font-family:var(--sans);font-size:13px;font-weight:500;color:var(--text);cursor:pointer;transition:background .1s" onmouseenter="this.style.background='var(--surface3)'" onmouseleave="this.style.background='var(--surface2)'">
+      <svg viewBox="0 0 16 16" fill="none" width="14" height="14" stroke="currentColor" stroke-width="1.5"><path d="M8 14V6M5 9l3-3 3 3"/><path d="M3 12h10"/></svg>
+      Importa
+    </button>
+    <input type="file" id="import-file-input" accept=".json" style="display:none" onchange="importData(this)">
+  </div>
+
+  <div class="dp-sep" style="margin-top:8px"></div>
 </div>
 
 <!-- TYPE PICKER PANEL -->
@@ -4181,7 +4200,44 @@ async function init(){
   switchView(state.currentView||'list');
 }
 
-// ── LOGIN ──
+// ── EXPORT / IMPORT ──
+function exportData() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  const date = new Date().toISOString().slice(0,10);
+  a.href     = url;
+  a.download = `salesmart-backup-${date}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importData(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const parsed = JSON.parse(e.target.result);
+      if (!parsed?.projects || !parsed?.tasks) {
+        alert('File non valido — mancano projects o tasks.');
+        return;
+      }
+      if (!confirm(`Importare il backup del ${file.name.match(/\d{4}-\d{2}-\d{2}/)?.[0] || 'file selezionato'}?\nI dati attuali verranno sostituiti.`)) return;
+      _applyState(parsed, false);
+      save();
+      updateHeader();
+      renderCurrentView();
+      updateBoardBadge();
+      closeSettingsPanel();
+      showSync('✓ Importato', '', 'ok');
+    } catch(_) {
+      alert('Errore nella lettura del file. Assicurati che sia un backup valido.');
+    }
+    input.value = ''; // reset per permettere re-import dello stesso file
+  };
+  reader.readAsText(file);
+}
 const LOGIN_EMAIL = 'admin@salesmart.it';
 const LOGIN_PASSWORD = 'vivalafoca';
 const SESSION_KEY = 'sm_session';
