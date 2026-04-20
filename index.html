@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<title>Ehivents</title>
+<title>Progetti Salesmart 2</title>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -1328,7 +1328,7 @@ input, textarea, select, button {
   <div id="header">
     <div class="header-logo">
       <div class="header-logo-mark">✦</div>
-      ehivents
+      progetti-salesmart
     </div>
     <button class="header-project-btn" id="project-selector-btn" onclick="openProjectsPanel()">
       <div class="project-dot-sm" id="header-proj-dot" style="background:#5b4be8"></div>
@@ -1586,10 +1586,10 @@ const MONTHS_IT=['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio
 
 // URL del tuo Realtime Database (lo trovi in Firebase → RTDB → Data)
 // Formato: https://<project>-default-rtdb.<region>.firebasedatabase.app
-const RTDB_URL = 'https://pm-tool-dda58-default-rtdb.europe-west1.firebasedatabase.app';
+const RTDB_URL = 'https://progetti-salesmart-default-rtdb.europe-west1.firebasedatabase.app';
 
 // Nodo dove salviamo tutto lo state
-const RTDB_NODE = `${RTDB_URL}/ehivents/workspace.json`;
+const RTDB_NODE = `${RTDB_URL}/salesmart/workspace.json`;
 
 // ── STATE ──
 let state = { projects:[], tasks:[], activeProjectId:null, currentView:'list', users:[], taskTypes:[] };
@@ -1645,7 +1645,7 @@ async function rtdbDiag() {
 // ── SAVE (debounced — PUT su RTDB + localStorage) ────────────────
 function save() {
   // Salvataggio locale immediato — sempre, anche offline
-  try { localStorage.setItem('flow_v3', JSON.stringify(state)); } catch(_) {}
+  try { localStorage.setItem('flow_v3_p2', JSON.stringify(state)); } catch(_) {}
   showSync('⏳', 'Salvataggio...', 'neutral');
 
   clearTimeout(_saveTimer);
@@ -1733,7 +1733,7 @@ function _applyState(s, saveLocal) {
   if (!state.taskTypes)   state.taskTypes   = [];
   if (!state.projects.find(p => p.id === state.activeProjectId))
     state.activeProjectId = state.projects.length ? state.projects[0].id : null;
-  if (saveLocal) try { localStorage.setItem('flow_v3', JSON.stringify(state)); } catch(_) {}
+  if (saveLocal) try { localStorage.setItem('flow_v3_p2', JSON.stringify(state)); } catch(_) {}
 }
 
 // ── REALTIME SYNC via SSE (Server-Sent Events) ───────────────────
