@@ -2291,6 +2291,8 @@ async function rtdbDiag() {
 
 // ── SAVE (debounced — PUT su RTDB + localStorage) ────────────────
 function save() {
+  // Aggiorna timestamp ad ogni modifica — usato per conflict detection
+  state._ts = Date.now();
   // Salvataggio locale immediato — sempre, anche offline
   try { localStorage.setItem('flow_v3_p2', JSON.stringify(state)); } catch(_) {}
   showSync('↻', 'Salvataggio...', 'neutral');
@@ -2298,6 +2300,7 @@ function save() {
   clearTimeout(_saveTimer);
   _saveTimer = setTimeout(async () => {
     _ignoreSse = true;
+    const tsAtSave = state._ts;
     try {
       const res = await fetch(RTDB_NODE, {
         method:  'PUT',
@@ -2307,7 +2310,6 @@ function save() {
       if (!res.ok) throw new Error('HTTP ' + res.status);
       _rtdbAvailable = true;
       showSync('✓ Sincronizzato', '', 'ok');
-      console.log('✅ Salvato su Firebase');
     } catch(e) {
       _rtdbAvailable = false;
       showSync('! Solo locale', '', 'err');
@@ -2315,7 +2317,8 @@ function save() {
       setTimeout(()=>{ const el=document.getElementById('sync-indicator'); if(el) el.style.opacity='0'; }, 3000);
     } finally {
       _saveTimer = null;
-      setTimeout(()=>{ _ignoreSse = false; }, 1000);
+      // Aspetta che l'SSE rimbalzi il nostro stesso evento prima di riabilitare
+      setTimeout(()=>{ _ignoreSse = false; }, 3000);
     }
   }, 600);
 }
@@ -2332,22 +2335,31 @@ async function load() {
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const remote = await res.json();
     _rtdbAvailable = true;
-    console.log('📥 Dati da Firebase:', remote);
 
-    // Firebase può restituire null se il nodo è vuoto
     if (remote && typeof remote === 'object' && remote.projects && remote.tasks) {
-      _applyState(remote, true);
+      // Confronta timestamp: usa il più recente tra Firebase e localStorage
+      const lsRaw = localStorage.getItem('flow_v3_p2');
+      let lsState = null;
+      try { lsState = lsRaw ? JSON.parse(lsRaw) : null; } catch(_) {}
+      const remoteTs = remote._ts || 0;
+      const localTs  = lsState?._ts || 0;
+      if (localTs > remoteTs && lsState?.projects?.length) {
+        // localStorage è più recente — usa quello e risincronizza Firebase
+        console.log('📦 localStorage più recente di Firebase, uso localStorage');
+        _applyState(lsState, false);
+        save(); // risincronizza Firebase con i dati locali più recenti
+      } else {
+        _applyState(remote, true);
+        console.log('✅ Stato caricato da Firebase');
+      }
       showSync('✓ Sincronizzato', '', 'ok');
-      console.log('✅ Stato caricato da Firebase');
-      return; // Firebase ha i dati, non serve localStorage
+      return;
     } else {
-      // Firebase raggiungibile ma nodo vuoto — prova localStorage
-      console.log('ℹ️ Firebase vuoto, provo localStorage');
+      // Firebase vuoto — prova localStorage
       _tryLoadLocalStorage();
       showSync('✓ Pronto', '', 'ok');
     }
   } catch(e) {
-    // Firebase non raggiungibile — usa localStorage come fallback
     _rtdbAvailable = false;
     console.warn('Firebase non raggiungibile:', e.message);
     _tryLoadLocalStorage();
@@ -2358,13 +2370,14 @@ async function load() {
 
 function _tryLoadLocalStorage() {
   try {
-    const raw = localStorage.getItem('flow_v3') || localStorage.getItem('flow_v2');
+    const raw = localStorage.getItem('flow_v3_p2')
+             || localStorage.getItem('flow_v3')
+             || localStorage.getItem('flow_v2');
     if (raw) {
       const p = JSON.parse(raw);
       if (p?.projects && p?.tasks) {
         _applyState(p, false);
         console.log('📦 Stato caricato da localStorage');
-        // Se Firebase è disponibile, carica subito i dati locali su Firebase
         if (_rtdbAvailable) save();
       }
     }
@@ -2407,11 +2420,13 @@ function startRealtimeSync() {
     if (_ignoreSse) return;           // nostra stessa scrittura → ignora
     try {
       const msg = JSON.parse(e.data);
-      // path '/' = aggiornamento completo del nodo
       if (msg.path === '/' && msg.data?.projects && msg.data?.tasks) {
+        // Non sovrascrivere se i nostri dati sono più recenti
+        const remoteTs = msg.data._ts || 0;
+        const localTs  = state._ts   || 0;
+        if (remoteTs <= localTs) return; // già aggiornato o più recente in locale
         const prevActive = state.activeProjectId;
         const prevView   = state.currentView;
-        // Aggiorna solo se i dati sono effettivamente cambiati
         const before = JSON.stringify({p:state.projects, t:state.tasks});
         const after  = JSON.stringify({p:msg.data.projects, t:msg.data.tasks});
         if (before === after) return;
