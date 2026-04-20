@@ -608,6 +608,7 @@ body {
   z-index: 3;
   background: var(--surface);
   border-right: 1px solid var(--border);
+  box-shadow: 2px 0 4px rgba(0,0,0,0.04);
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -2713,8 +2714,8 @@ function renderBoard() {
     const tasks = filteredSortedTasks(tasksByStatus(col.id));
     return `<div class="board-col" data-col="${col.id}" ondragover="onDragOver(event,'${col.id}')" ondrop="onDrop(event,'${col.id}')" ondragleave="onDragLeave(event)">
       <div class="board-col-header"><span class="col-title ${col.id}">${col.label}</span><span class="col-count">${tasks.length}</span></div>
-      <div class="board-cards" id="cards-${col.id}">${tasks.map(t=>cardHtml(t)).join('')}</div>
       <button class="board-add" onclick="addTaskInStatus('${col.id}')"><span style="font-size:16px;color:var(--accent)">+</span> aggiungi task</button>
+      <div class="board-cards" id="cards-${col.id}">${tasks.map(t=>cardHtml(t)).join('')}</div>
     </div>`;
   }).join('');
   el.querySelectorAll('.board-card').forEach(card => {
@@ -2998,7 +2999,7 @@ function renderGantt() {
       </div>
     </div>
     <div class="gantt-scroll" id="gantt-scroll">
-      <div style="display:flex;flex-direction:column;min-width:${labelW + totalW}px">
+      <div style="display:flex;flex-direction:column;min-width:${labelW + totalW}px;width:max-content">
         ${bodyRowsHtml}
       </div>
     </div>`;
@@ -4109,7 +4110,10 @@ function enableListReorder() {
 }
 
 function reorderTask(dragId, targetId) {
-  const proj = state.activeProjectId;
+  const dragTask = state.tasks.find(t => t.id === dragId);
+  const targetTask = state.tasks.find(t => t.id === targetId);
+  if (!dragTask || !targetTask || dragTask.projectId !== targetTask.projectId) return;
+  const proj = dragTask.projectId;
   const projectTasks = state.tasks.filter(t => t.projectId === proj);
   const others = state.tasks.filter(t => t.projectId !== proj);
   const fromIdx = projectTasks.findIndex(t => t.id === dragId);
@@ -4122,9 +4126,11 @@ function reorderTask(dragId, targetId) {
   renderCurrentView();
 }
 
-// Move a task up (-1) or down (+1) among ALL active tasks (syncs across all views)
+// Move a task up (-1) or down (+1) among tasks of the same project
 function moveTask(taskId, dir) {
-  const proj = state.activeProjectId;
+  const task = state.tasks.find(t => t.id === taskId);
+  if (!task) return;
+  const proj = task.projectId;
   const projectTasks = state.tasks.filter(t => t.projectId === proj);
   const others = state.tasks.filter(t => t.projectId !== proj);
   const idx = projectTasks.findIndex(t => t.id === taskId);
