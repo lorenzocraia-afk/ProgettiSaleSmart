@@ -2329,9 +2329,13 @@ let _rtdbAvailable = false;
 async function load() {
   showSync('↻', 'Caricamento...', 'neutral');
 
-  // 1. Prima prova Firebase — è la fonte di verità
+  // Timeout di sicurezza: se Firebase non risponde in 5s, vai subito a localStorage
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5000);
+
   try {
-    const res = await fetch(RTDB_NODE);
+    const res = await fetch(RTDB_NODE, { signal: controller.signal });
+    clearTimeout(timeout);
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const remote = await res.json();
     _rtdbAvailable = true;
@@ -2344,27 +2348,24 @@ async function load() {
       const remoteTs = remote._ts || 0;
       const localTs  = lsState?._ts || 0;
       if (localTs > remoteTs && lsState?.projects?.length) {
-        // localStorage è più recente — usa quello e risincronizza Firebase
-        console.log('📦 localStorage più recente di Firebase, uso localStorage');
         _applyState(lsState, false);
         save(); // risincronizza Firebase con i dati locali più recenti
       } else {
         _applyState(remote, true);
-        console.log('✅ Stato caricato da Firebase');
       }
-      showSync('✓ Sincronizzato', '', 'ok');
+      showSync('✓', '', 'ok');
       return;
     } else {
-      // Firebase vuoto — prova localStorage
       _tryLoadLocalStorage();
-      showSync('✓ Pronto', '', 'ok');
+      showSync('✓', '', 'ok');
     }
   } catch(e) {
+    clearTimeout(timeout);
     _rtdbAvailable = false;
-    console.warn('Firebase non raggiungibile:', e.message);
     _tryLoadLocalStorage();
+    // Mostra offline solo brevemente, poi sparisce
     showSync('– Offline', '', 'neutral');
-    setTimeout(()=>{ const el=document.getElementById('sync-indicator'); if(el) el.style.opacity='0'; }, 3000);
+    setTimeout(()=>{ const el=document.getElementById('sync-indicator'); if(el) el.style.opacity='0'; }, 2000);
   }
 }
 
@@ -2406,25 +2407,24 @@ function _applyState(s, saveLocal) {
 }
 
 // ── REALTIME SYNC via SSE (Server-Sent Events) ───────────────────
-// RTDB supporta nativamente SSE: basta aggiungere Accept: text/event-stream.
-// Quando un altro dispositivo scrive, il server ci spinge l'aggiornamento
-// in meno di 1 secondo — senza polling, senza SDK.
 let _ignoreSse = false;
 
 function startRealtimeSync() {
-  if (!_rtdbAvailable) return;  // offline — non aprire SSE
-  // EventSource apre una connessione HTTP persistente verso RTDB
+  // Avvia sempre SSE — anche se al load Firebase era irraggiungibile,
+  // potrebbe diventare disponibile dopo
+  if (_sseSource) { _sseSource.close(); _sseSource = null; }
   _sseSource = new EventSource(`${RTDB_NODE}?timeout=600s`);
 
   _sseSource.addEventListener('put', e => {
-    if (_ignoreSse) return;           // nostra stessa scrittura → ignora
+    if (_ignoreSse) return;
     try {
       const msg = JSON.parse(e.data);
       if (msg.path === '/' && msg.data?.projects && msg.data?.tasks) {
-        // Non sovrascrivere se i nostri dati sono più recenti
         const remoteTs = msg.data._ts || 0;
         const localTs  = state._ts   || 0;
-        if (remoteTs <= localTs) return; // già aggiornato o più recente in locale
+        // Ignora solo se i dati locali sono STRETTAMENTE più recenti
+        // (stesso ts = altro terminale ha caricato i nostri stessi dati → ignora)
+        if (remoteTs > 0 && remoteTs < localTs) return;
         const prevActive = state.activeProjectId;
         const prevView   = state.currentView;
         const before = JSON.stringify({p:state.projects, t:state.tasks});
@@ -2442,13 +2442,13 @@ function startRealtimeSync() {
   });
 
   _sseSource.addEventListener('cancel', () => {
-    // RTDB chiude la connessione dopo timeout — riapriamo
     setTimeout(startRealtimeSync, 3000);
   });
 
   _sseSource.onerror = () => {
     _sseSource.close();
-    if (_rtdbAvailable) setTimeout(startRealtimeSync, 5000);  // riconnette solo se online
+    _sseSource = null;
+    setTimeout(startRealtimeSync, 5000);
   };
 }
 
