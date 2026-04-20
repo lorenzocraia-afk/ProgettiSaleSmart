@@ -84,9 +84,9 @@ body {
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
-  padding-left: 16px;
-  padding-right: 16px;
-  gap: 12px;
+  padding-left: 12px;
+  padding-right: 12px;
+  gap: 8px;
   flex-shrink: 0;
   position: relative;
   z-index: 20;
@@ -103,33 +103,39 @@ body {
   gap: 7px;
   flex-shrink: 0;
 }
+/* nascosto su mobile, visibile su desktop */
+.header-logo-text { display: none; }
+@media (min-width: 600px) { .header-logo-text { display: inline; } }
+
 .header-logo-mark {
   width: 24px; height: 24px;
   border-radius: 6px;
   background: var(--accent);
   display: flex; align-items: center; justify-content: center;
   font-size: 12px;
+  flex-shrink: 0;
 }
 .header-project-btn {
   flex: 1;
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 6px;
   background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 5px 10px;
+  padding: 6px 10px;
   cursor: pointer;
   font-family: var(--sans);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--text);
-  min-width: 0;
-  transition: all 0.12s ease;
+  transition: background 0.1s ease;
+  overflow: hidden;
 }
-.header-project-btn:active { background: var(--surface3); }
+.header-project-btn:hover, .header-project-btn:active { background: var(--surface3); }
 .project-dot-sm { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.header-project-btn .proj-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; }
+.header-project-btn .proj-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; font-size: 13px; }
 .header-project-btn .proj-arrow { color: var(--text-faint); flex-shrink: 0; font-size: 10px; }
 .header-add-btn {
   width: 30px; height: 30px;
@@ -1055,7 +1061,39 @@ body {
 .dp-option .opt-icon { width: 30px; height: 30px; border-radius: 7px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 13px; }
 .dp-sep { height: 1px; background: var(--border); margin: 4px 16px; }
 
-/* ── PROJECT LIST PANEL ── */
+/* ── PROJECT PANEL — desktop popover ── */
+@media (min-width: 600px) {
+  #projects-panel-overlay {
+    background: transparent;
+  }
+  #projects-panel {
+    position: fixed;
+    bottom: auto;
+    left: auto;
+    right: auto;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.06);
+    width: 280px;
+    max-height: 420px;
+    animation: scaleIn 0.15s cubic-bezier(0.34,1.1,0.64,1);
+    padding-bottom: 8px;
+  }
+  #projects-panel .dp-handle { display: none; }
+  #projects-panel .dp-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-faint);
+    padding: 12px 16px 8px;
+    text-align: left;
+  }
+  #projects-panel .panel-project-item { padding: 8px 16px; }
+  #projects-panel .panel-add-project { padding: 8px 16px; font-size: 13px; }
+  #projects-panel .panel-danger-item { padding: 8px 16px; font-size: 13px; }
+  #projects-panel .dp-sep { margin: 4px 12px; }
+}
 .panel-project-item {
   display: flex; align-items: center; gap: 12px;
   padding: 14px 20px;
@@ -1779,7 +1817,7 @@ input, textarea, select, button {
   <div id="header">
     <div class="header-logo">
       <div class="header-logo-mark"><svg viewBox="0 0 16 16" fill="none" width="14" height="14"><rect x="3" y="3" width="10" height="2" rx="1" fill="white"/><rect x="3" y="7" width="7" height="2" rx="1" fill="white"/><rect x="3" y="11" width="9" height="2" rx="1" fill="white"/></svg></div>
-      progetti-salesmart
+      <span class="header-logo-text">progetti-salesmart</span>
     </div>
     <button class="header-project-btn" id="project-selector-btn" onclick="openProjectsPanel()">
       <div class="project-dot-sm" id="header-proj-dot" style="background:#5b4be8"></div>
@@ -1847,11 +1885,6 @@ input, textarea, select, button {
   <div class="panel-add-project" onclick="closeProjectsPanel();openProjectModal()">
     <span style="font-size:18px;line-height:1">+</span>
     Nuovo progetto
-  </div>
-  <div class="dp-sep"></div>
-  <div class="panel-danger-item" onclick="closeProjectsPanel();confirmResetAll()">
-    <svg viewBox="0 0 16 16" fill="none" width="16" height="16" stroke="currentColor" stroke-width="1.5"><path d="M8 2L1 14h14L8 2z"/><path d="M8 7v3M8 12v.5"/></svg>
-    Reset dati
   </div>
 </div>
 
@@ -1997,19 +2030,25 @@ input, textarea, select, button {
   <div class="dp-handle"></div>
   <div class="dp-title">Impostazioni</div>
 
-  <!-- UTENTI -->
-  <div class="settings-section-title"><svg viewBox="0 0 16 16" fill="none" width="13" height="13" stroke="currentColor" stroke-width="1.5" style="flex-shrink:0"><circle cx="6" cy="5" r="2"/><path d="M2 13c0-2.2 1.8-4 4-4s4 1.8 4 4"/><circle cx="11" cy="5" r="1.5"/><path d="M12 9c1.1.5 2 1.7 2 3"/></svg> Team</div>
+  <!-- 1. ASSEGNATARI -->
+  <div class="settings-section-title">
+    <svg viewBox="0 0 16 16" fill="none" width="13" height="13" stroke="currentColor" stroke-width="1.5" style="flex-shrink:0"><circle cx="6" cy="5" r="2"/><path d="M2 13c0-2.2 1.8-4 4-4s4 1.8 4 4"/><circle cx="11" cy="5" r="1.5"/><path d="M12 9c1.1.5 2 1.7 2 3"/></svg>
+    Assegnatari
+  </div>
   <div id="settings-users-list"></div>
   <div class="settings-add-row">
-    <input class="settings-add-input" id="new-user-input" placeholder="Nome utente…" maxlength="40"
+    <input class="settings-add-input" id="new-user-input" placeholder="Nome assegnatario…" maxlength="40"
       onkeydown="if(event.key==='Enter')addUser()">
     <button class="settings-add-btn" onclick="addUser()">Aggiungi</button>
   </div>
 
   <div class="dp-sep"></div>
 
-  <!-- TIPOLOGIE TASK -->
-  <div class="settings-section-title"><svg viewBox="0 0 16 16" fill="none" width="13" height="13" stroke="currentColor" stroke-width="1.5" style="flex-shrink:0"><path d="M9 2H3a1 1 0 0 0-1 1v6l6 6 6-6-5-7z"/><circle cx="5.5" cy="6.5" r="1"/></svg> Tipologie task</div>
+  <!-- 2. TIPOLOGIE TASK -->
+  <div class="settings-section-title">
+    <svg viewBox="0 0 16 16" fill="none" width="13" height="13" stroke="currentColor" stroke-width="1.5" style="flex-shrink:0"><path d="M9 2H3a1 1 0 0 0-1 1v6l6 6 6-6-5-7z"/><circle cx="5.5" cy="6.5" r="1"/></svg>
+    Tipologie task
+  </div>
   <div id="settings-types-list"></div>
   <div class="settings-add-row" style="flex-direction:column;align-items:stretch;gap:10px">
     <input class="settings-add-input" id="new-type-name-input" placeholder="Nome tipologia…" maxlength="30"
@@ -2021,11 +2060,30 @@ input, textarea, select, button {
     <button class="settings-add-btn" onclick="addTaskType()" style="align-self:flex-start">Aggiungi tipologia</button>
   </div>
 
-  <div class="dp-sep" style="margin-top:8px"></div>
-  <div class="panel-danger-item" onclick="closeSettingsPanel();confirmResetAll()">
-    <svg viewBox="0 0 16 16" fill="none" width="16" height="16" stroke="currentColor" stroke-width="1.5"><path d="M8 2L1 14h14L8 2z"/><path d="M8 7v3M8 12v.5"/></svg>
-    Reset dati
+  <div class="dp-sep"></div>
+
+  <!-- 3. OWNER PROGETTO -->
+  <div class="settings-section-title">
+    <svg viewBox="0 0 16 16" fill="none" width="13" height="13" stroke="currentColor" stroke-width="1.5" style="flex-shrink:0"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>
+    Owner progetto
   </div>
+  <div id="settings-owners-list"></div>
+
+  <div class="dp-sep"></div>
+
+  <!-- 4. STATI PROGETTO -->
+  <div class="settings-section-title">
+    <svg viewBox="0 0 16 16" fill="none" width="13" height="13" stroke="currentColor" stroke-width="1.5" style="flex-shrink:0"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>
+    Stati progetto
+  </div>
+  <div id="settings-statuses-list"></div>
+  <div class="settings-add-row">
+    <input class="settings-add-input" id="new-status-input" placeholder="Nome stato…" maxlength="30"
+      onkeydown="if(event.key==='Enter')addStatusFromSettings()">
+    <button class="settings-add-btn" onclick="addStatusFromSettings()">Aggiungi</button>
+  </div>
+
+  <div class="dp-sep" style="margin-top:8px"></div>
 </div>
 
 <!-- TYPE PICKER PANEL -->
@@ -2296,8 +2354,25 @@ function updateHeader() {
 // ── PROJECTS PANEL ──
 function openProjectsPanel() {
   renderProjectsPanel();
-  document.getElementById('projects-panel-overlay').style.display = 'block';
-  document.getElementById('projects-panel').style.display = 'block';
+  const panel = document.getElementById('projects-panel');
+  const overlay = document.getElementById('projects-panel-overlay');
+  overlay.style.display = 'block';
+  panel.style.display = 'block';
+
+  // Desktop: anchor as popover below the button
+  if (window.innerWidth >= 600) {
+    const btn = document.getElementById('project-selector-btn');
+    const rect = btn.getBoundingClientRect();
+    panel.style.top  = (rect.bottom + 6) + 'px';
+    panel.style.left = rect.left + 'px';
+    // keep within viewport right edge
+    requestAnimationFrame(() => {
+      const pr = panel.getBoundingClientRect();
+      if (pr.right > window.innerWidth - 8) {
+        panel.style.left = (window.innerWidth - pr.width - 8) + 'px';
+      }
+    });
+  }
 }
 function closeProjectsPanel() {
   document.getElementById('projects-panel-overlay').style.display = 'none';
@@ -3495,7 +3570,9 @@ function selectProjectFromTable(id) {
 function removeProjectStatus(idx) {
   if (!state.projectStatuses || !state.projectStatuses.length) state.projectStatuses = DEFAULT_PROJECT_STATUSES.map(s=>({...s}));
   state.projectStatuses.splice(idx,1);
-  save(); renderTable();
+  save();
+  renderSettingsPanel();
+  if (state.currentView === 'table') renderTable();
 }
 
 function promptAddProjectStatus() {
@@ -3551,11 +3628,11 @@ function closeSettingsPanel() {
 }
 
 function renderSettingsPanel() {
-  // Users
+  // 1. Assegnatari
   const users = state.users && state.users.length > 0 ? state.users : [];
   const ul = document.getElementById('settings-users-list');
   if (users.length === 0) {
-    ul.innerHTML = `<div style="padding:6px 20px 10px;font-size:12px;color:var(--text-faint)">Nessun utente aggiunto — viene usata la lista predefinita.</div>`;
+    ul.innerHTML = `<div style="padding:6px 20px 10px;font-size:12px;color:var(--text-faint)">Nessun assegnatario — verrà usata la lista predefinita.</div>`;
   } else {
     ul.innerHTML = users.map((u,i) => `
       <div class="settings-item">
@@ -3565,7 +3642,7 @@ function renderSettingsPanel() {
       </div>`).join('');
   }
 
-  // Task types
+  // 2. Tipologie task
   const types = state.taskTypes || [];
   const tl = document.getElementById('settings-types-list');
   if (types.length === 0) {
@@ -3578,6 +3655,67 @@ function renderSettingsPanel() {
         <button class="settings-remove-btn" onclick="removeTaskType(${i})"><svg viewBox="0 0 12 12" fill="none" width="11" height="11" stroke="currentColor" stroke-width="1.8"><path d="M2 2l8 8M10 2l-8 8"/></svg></button>
       </div>`).join('');
   }
+
+  // 3. Owner per progetto
+  const ol = document.getElementById('settings-owners-list');
+  if (!state.projects.length) {
+    ol.innerHTML = `<div style="padding:6px 20px 10px;font-size:12px;color:var(--text-faint)">Nessun progetto creato.</div>`;
+  } else {
+    const assignees = getAssignees();
+    ol.innerHTML = state.projects.map(p => {
+      const cur = p.owner || '';
+      const opts = `<option value="">— Nessuno —</option>` +
+        assignees.map(a => `<option value="${escHtml(a)}" ${a===cur?'selected':''}>${escHtml(a)}</option>`).join('');
+      return `<div class="settings-item">
+        <div style="width:9px;height:9px;border-radius:50%;background:${projectColor(p.id)};flex-shrink:0"></div>
+        <span class="settings-item-label" style="font-size:13px">${escHtml(p.name)}</span>
+        <select onchange="setProjectOwner('${p.id}',this.value)"
+          style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-family:var(--sans);font-size:12px;color:var(--text);outline:none;cursor:pointer;max-width:120px">
+          ${opts}
+        </select>
+      </div>`;
+    }).join('');
+  }
+
+  // 4. Stati progetto
+  const sl = document.getElementById('settings-statuses-list');
+  const statuses = getProjectStatuses();
+  if (!statuses.length) {
+    sl.innerHTML = `<div style="padding:6px 20px 10px;font-size:12px;color:var(--text-faint)">Nessuno stato aggiunto.</div>`;
+  } else {
+    sl.innerHTML = statuses.map((s,i) => {
+      const col = s.color || '#9c988f';
+      return `<div class="settings-item">
+        <div style="width:10px;height:10px;border-radius:50%;background:${col};flex-shrink:0"></div>
+        <input value="${escHtml(s.name)}"
+          style="flex:1;background:none;border:none;outline:none;font-family:var(--sans);font-size:13px;color:var(--text);min-width:0"
+          onblur="renameProjStatus(${i},this.value)"
+          onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape'){this.value=this.dataset.orig;this.blur();}"
+          onfocus="this.dataset.orig=this.value">
+        <button class="settings-remove-btn" onclick="removeProjectStatus(${i})"><svg viewBox="0 0 12 12" fill="none" width="11" height="11" stroke="currentColor" stroke-width="1.8"><path d="M2 2l8 8M10 2l-8 8"/></svg></button>
+      </div>`;
+    }).join('');
+  }
+}
+
+function setProjectOwner(projectId, owner) {
+  const proj = state.projects.find(p => p.id === projectId);
+  if (proj) { proj.owner = owner; save(); if (state.currentView === 'table') renderTable(); }
+}
+
+function addStatusFromSettings() {
+  const input = document.getElementById('new-status-input');
+  const name = input.value.trim();
+  if (!name) { input.focus(); return; }
+  if (!state.projectStatuses) state.projectStatuses = DEFAULT_PROJECT_STATUSES.map(s=>({...s}));
+  if (!state.projectStatuses.find(s => s.name === name)) {
+    const col = STATUS_PALETTE[state.projectStatuses.length % STATUS_PALETTE.length];
+    state.projectStatuses.push({name, color: col});
+    save();
+  }
+  input.value = '';
+  renderSettingsPanel();
+  if (state.currentView === 'table') renderTable();
 }
 
 function renderNewTypeColorPicker() {
