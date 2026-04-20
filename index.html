@@ -2329,8 +2329,9 @@ let _rtdbAvailable = false;
 async function load() {
   showSync('↻', 'Caricamento...', 'neutral');
 
+  // Timeout generoso — connessioni mobile/lente hanno bisogno di tempo
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 6000);
+  const timeout = setTimeout(() => controller.abort(), 15000);
 
   try {
     const res = await fetch(RTDB_NODE, { signal: controller.signal });
@@ -2340,20 +2341,21 @@ async function load() {
     _rtdbAvailable = true;
 
     if (remote && typeof remote === 'object' && remote.projects && remote.tasks) {
-      // Firebase è la fonte di verità — carica sempre da Firebase
+      // Firebase ha dati → è sempre la fonte di verità
       _applyState(remote, true);
       showSync('✓', '', 'ok');
       return;
     } else {
-      // Firebase raggiungibile ma vuoto — usa localStorage
+      // Firebase raggiungibile ma vuoto → primo avvio assoluto
       _tryLoadLocalStorage();
       showSync('✓', '', 'ok');
     }
   } catch(e) {
     clearTimeout(timeout);
     _rtdbAvailable = false;
-    // Firebase non raggiungibile — fallback a localStorage
-    _tryLoadLocalStorage();
+    // Firebase non raggiungibile → mostra dati da localStorage
+    // MA non chiamare save() — non vogliamo sovrascrivere Firebase con dati locali parziali
+    _tryLoadLocalStorageReadOnly();
     showSync('– Offline', '', 'neutral');
     setTimeout(()=>{ const el=document.getElementById('sync-indicator'); if(el) el.style.opacity='0'; }, 2000);
   }
@@ -2368,8 +2370,23 @@ function _tryLoadLocalStorage() {
       const p = JSON.parse(raw);
       if (p?.projects && p?.tasks) {
         _applyState(p, false);
-        console.log('📦 Stato caricato da localStorage');
         if (_rtdbAvailable) save();
+      }
+    }
+  } catch(_) {}
+}
+
+// Come _tryLoadLocalStorage ma NON chiama save() — usata quando Firebase è offline
+// per evitare di sovrascrivere Firebase con dati locali potenzialmente vecchi
+function _tryLoadLocalStorageReadOnly() {
+  try {
+    const raw = localStorage.getItem('flow_v3_p2')
+             || localStorage.getItem('flow_v3')
+             || localStorage.getItem('flow_v2');
+    if (raw) {
+      const p = JSON.parse(raw);
+      if (p?.projects && p?.tasks) {
+        _applyState(p, false);
       }
     }
   } catch(_) {}
@@ -3456,29 +3473,7 @@ function renderTable() {
     </tr>`;
   }).join('');
 
-  const statusManagerHtml = `<div class="tbl-status-manager">
-    <span class="tbl-status-manager-label">Stati progetto:</span>
-    ${getProjectStatuses().map((s,i) => {
-      const col = s.color || '#9c988f';
-      return `<span style="display:inline-flex;align-items:center;gap:5px;background:${col}12;border:1.5px solid ${col}33;border-radius:var(--radius-pill);padding:3px 6px 3px 10px;font-family:var(--sans)">
-        <span style="width:6px;height:6px;border-radius:50%;background:${col};flex-shrink:0"></span>
-        <input class="tbl-status-edit-name" value="${escHtml(s.name)}" style="color:${col}" 
-          title="Rinomina stato"
-          onblur="renameProjStatus(${i},this.value)"
-          onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape'){this.value=this.dataset.orig;this.blur();}"
-          onfocus="this.dataset.orig=this.value"
-          onclick="event.stopPropagation()">
-        <button onclick="removeProjectStatus(${i})" style="background:none;border:none;cursor:pointer;color:${col};opacity:.5;font-size:16px;line-height:1;padding:0 2px;margin:0;transition:opacity .12s" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='.5'" title="Rimuovi">×</button>
-      </span>`;
-    }).join('')}
-    <span id="tbl-add-status-wrap" style="display:inline-flex;align-items:center;gap:0">
-      <input id="tbl-new-status-input" placeholder="+ nuovo stato"
-        style="background:none;border:none;outline:none;font-family:var(--sans);font-size:11px;font-weight:600;color:var(--accent);width:100px;cursor:pointer;padding:4px 6px;border-radius:var(--radius-pill);transition:background .12s"
-        onfocus="this.style.background='var(--accent-dim)';this.style.cursor='text';this.style.width='130px'"
-        onblur="addProjectStatusInline(this)"
-        onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape')this.blur()">
-    </span>
-  </div>`;
+  const statusManagerHtml = ''; // gestito nelle Impostazioni
 
   // ── Mobile cards (shown on small screens instead of table) ──
   const mobileCards = projs.map(p => {
@@ -4155,7 +4150,10 @@ function moveTaskInStatus(taskId, status, dir) {
 async function init(){
   await load();
   startRealtimeSync();
-  if (state.projects.length===0){
+  // Inserisce dati demo SOLO se Firebase è raggiungibile ed è confermato vuoto
+  // Se Firebase era offline (_rtdbAvailable=false), non toccare nulla —
+  // i dati reali esistono su Firebase e verranno caricati alla prossima connessione
+  if (state.projects.length === 0 && _rtdbAvailable) {
     const p1={id:uid(),name:'Lancio prodotto'},p2={id:uid(),name:'Sito web'};
     state.projects=[p1,p2];state.activeProjectId=p1.id;
     state.users=['Federico','Stefano','Lorenzo','Giulia','Marco'];
