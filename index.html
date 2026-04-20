@@ -538,14 +538,14 @@ body {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
-  height: 4px;
+  height: 8px;
   border-radius: var(--radius) var(--radius) 0 0;
 }
 .board-col-header.todo::before    { background: var(--todo-color); }
 .board-col-header.inprogress::before { background: var(--inprogress-color); }
 .board-col-header.done::before    { background: var(--done-color); }
 
-.col-title { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+.col-title { font-size: 13px; font-weight: 700; letter-spacing: -0.1px; text-transform: none; }
 .col-title.todo { color: var(--todo-color); }
 .col-title.inprogress { color: var(--inprogress-color); }
 .col-title.done { color: var(--done-color); }
