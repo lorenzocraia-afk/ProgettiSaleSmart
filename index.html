@@ -13,31 +13,32 @@
 :root {
   --bg:           #ffffff;
   --surface:      #ffffff;
-  --surface2:     #f5f5f5;
-  --surface3:     #ebebeb;
-  --border:       #e5e5e5;
-  --border-light: #f0f0f0;
-  --text:         #0f0f0f;
-  --text-muted:   #6b6b6b;
-  --text-faint:   #a0a0a0;
+  --surface2:     #f7f7f7;
+  --surface3:     #eeeeee;
+  --border:       #e8e8e8;
+  --border-light: #f2f2f2;
+  --text:         #111111;
+  --text-muted:   #666666;
+  --text-faint:   #aaaaaa;
   --accent:       #5b4be8;
-  --accent-dim:   rgba(91,75,232,0.08);
+  --accent-dim:   rgba(91,75,232,0.07);
   --accent-border:rgba(91,75,232,0.20);
-  --todo-color:   #5b4be8;
-  --todo-bg:      rgba(91,75,232,0.07);
-  --inprogress-color: #c07800;
-  --inprogress-bg:    rgba(192,120,0,0.07);
-  --done-color:   #a0a0a0;
-  --done-bg:      rgba(160,160,160,0.08);
+  /* Stato: colori più saturi e distinguibili */
+  --todo-color:       #4f6ef7;
+  --todo-bg:          rgba(79,110,247,0.07);
+  --inprogress-color: #d97706;
+  --inprogress-bg:    rgba(217,119,6,0.08);
+  --done-color:       #22c55e;
+  --done-bg:          rgba(34,197,94,0.08);
   --danger:       #e5484d;
-  --safe:         #30a46c;
+  --safe:         #22c55e;
   --radius: 8px;
   --radius-sm: 6px;
   --radius-pill: 999px;
   --sans: 'Sora', sans-serif;
   --mono: 'JetBrains Mono', monospace;
-  --nav-h: 56px;
-  --header-h: 52px;
+  --nav-h: 52px;
+  --header-h: 48px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
@@ -234,19 +235,19 @@ body {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 10px 14px;
+  padding: 12px 14px 10px;
   cursor: pointer;
-  transition: background 0.1s ease;
+  transition: background 0.1s ease, box-shadow 0.1s ease;
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 6px;
   flex-shrink: 0;
   position: relative;
   overflow: hidden;
   word-break: break-word;
   min-width: 0;
 }
-.task-card:hover { background: var(--surface2); }
+.task-card:hover { background: var(--surface2); box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
 /* ── REORDER HANDLES ── */
 .reorder-handles {
   display: flex;
@@ -307,14 +308,13 @@ body {
   position: absolute;
   left: 0; top: 0; bottom: 0;
   width: 3px;
-  background: var(--todo-color);
+  background: var(--card-proj-color, var(--border));
   border-radius: 3px 0 0 3px;
-  opacity: 0;
+  opacity: 1;
   transition: opacity 0.15s;
 }
-.task-card.status-todo::before { opacity: 1; background: var(--todo-color); }
-.task-card.status-inprogress::before { opacity: 1; background: var(--inprogress-color); }
-.task-card.status-done { opacity: 0.55; }
+.task-card.status-done::before { opacity: 0.3; }
+.task-card.status-done { opacity: 0.6; }
 .task-card:active { transform: scale(0.98); background: var(--surface2); }
 
 .task-card-top { display: flex; align-items: flex-start; gap: 12px; }
@@ -333,11 +333,12 @@ body {
 .task-check.checked::after { content: ''; display: block; width: 9px; height: 6px; border-left: 1.5px solid #fff; border-bottom: 1.5px solid #fff; transform: rotate(-45deg) translate(1px,-1px); }
 .task-card-title {
   flex: 1;
-  min-width: 0;           /* crucial: allows text to shrink inside flexbox */
-  font-size: 14px;
-  font-weight: 500;
+  min-width: 0;
+  font-size: 15px;
+  font-weight: 600;
   color: var(--text);
-  line-height: 1.4;
+  line-height: 1.35;
+  letter-spacing: -0.2px;
   overflow-wrap: break-word;
   word-break: break-word;
 }
@@ -356,15 +357,20 @@ body {
 
 .status-pill {
   display: inline-flex; align-items: center; gap: 5px;
-  font-family: var(--sans); font-size: 11px; font-weight: 500;
-  padding: 2px 7px;
-  border-radius: 4px;
+  font-family: var(--sans); font-size: 11px; font-weight: 600;
+  letter-spacing: 0.01em;
+  padding: 0;
+  border-radius: 0;
   white-space: nowrap;
+  background: none;
 }
-.status-pill .pip { width: 5px; height: 5px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
-.status-pill.todo { color: var(--todo-color); background: var(--todo-bg); }
-.status-pill.inprogress { color: var(--inprogress-color); background: var(--inprogress-bg); }
-.status-pill.done-status { color: var(--done-color); background: var(--done-bg); }
+.status-pill .pip {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: currentColor; flex-shrink: 0;
+}
+.status-pill.todo { color: var(--todo-color); }
+.status-pill.inprogress { color: var(--inprogress-color); }
+.status-pill.done-status { color: var(--done-color); }
 
 .date-chip {
   display: inline-flex; align-items: center; gap: 4px;
@@ -454,11 +460,25 @@ body {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
 }
-.col-title { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
-.col-title.todo { color: var(--text-muted); }
+/* color band at top of column header */
+.board-col-header::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2.5px;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+.board-col-header.todo::before    { background: var(--todo-color); }
+.board-col-header.inprogress::before { background: var(--inprogress-color); }
+.board-col-header.done::before    { background: var(--done-color); }
+
+.col-title { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+.col-title.todo { color: var(--todo-color); }
 .col-title.inprogress { color: var(--inprogress-color); }
-.col-title.done { color: var(--text-faint); }
+.col-title.done { color: var(--done-color); }
 .col-count {
   margin-left: auto;
   font-family: var(--mono); font-size: 10px;
@@ -481,20 +501,32 @@ body {
   border-radius: var(--radius);
   padding: 10px 12px;
   cursor: pointer;
-  transition: background 0.1s ease;
+  transition: background 0.1s ease, box-shadow 0.1s ease;
   flex-shrink: 0;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
   min-width: 0;
   word-break: break-word;
+  position: relative;
+  overflow: hidden;
 }
-.board-card:hover { background: var(--surface2); }
+.board-card:hover { background: var(--surface2); box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
 .board-card:active { background: var(--surface2); }
 .board-card.dragging { opacity: 0.3; }
 .board-card.drag-over { border-color: var(--accent); background: var(--accent-dim); }
 
-.card-title { font-size: 12px; font-weight: 500; margin-bottom: 6px; line-height: 1.4; color: var(--text); }
+/* project color band on top of board card */
+.board-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2.5px;
+  background: var(--card-proj-color, var(--border));
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.card-title { font-size: 13px; font-weight: 600; margin-bottom: 6px; line-height: 1.35; color: var(--text); letter-spacing: -0.1px; }
 .card-title.done { text-decoration: line-through; color: var(--text-faint); font-weight: 400; }
 .card-footer { display: flex; align-items: center; gap: 8px; }
 .card-date { font-family: var(--mono); font-size: 10px; color: var(--text-faint); margin-left: auto; }
@@ -598,29 +630,27 @@ body {
   height: 44px;
   border-bottom: 1px solid var(--border-light);
   flex-shrink: 0;
+  /* width must match the scroll container width for sticky to work */
+  min-width: 100%;
 }
 .gantt-row:hover { background: rgba(91,75,232,0.02); }
 
-/* Sticky label cell */
+/* Sticky label cell — now in its own fixed panel, no sticky needed */
 .gantt-label-cell {
-  position: sticky;
-  left: 0;
-  z-index: 3;
+  position: relative;
+  z-index: 1;
   background: var(--surface);
-  border-right: 1px solid var(--border);
-  box-shadow: 2px 0 4px rgba(0,0,0,0.04);
   flex-shrink: 0;
   display: flex;
   align-items: center;
   padding: 0 10px;
   cursor: pointer;
   transition: background 0.1s;
-  width: clamp(110px, 28vw, 160px);
-  min-width: clamp(110px, 28vw, 160px);
-  max-width: clamp(110px, 28vw, 160px);
+  width: 100%;
   box-sizing: border-box;
 }
-.gantt-row:hover .gantt-label-cell { background: var(--surface3); }
+.gantt-label-cell:hover { background: var(--surface2); }
+.gantt-label-cell.gantt-drag-over { background: var(--accent-dim); outline: 2px solid var(--accent); outline-offset: -2px; }
 .gantt-label-cell .g-title {
   font-size: 11px;
   font-weight: 400;
@@ -628,7 +658,8 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 100%;
+  flex: 1;
+  min-width: 0;
 }
 .gantt-label-cell .g-title.done { text-decoration: line-through; color: var(--text-faint); }
 
@@ -1797,7 +1828,7 @@ input, textarea, select, button {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
+  padding: 5px 12px;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
@@ -2667,12 +2698,12 @@ function renderList() {
 function taskCardHtml(t) {
   const overdue = t.due && isOverdue(t.due) && t.status!=='done';
   const tp = getTaskType(t.type||'');
-  // Get position among all active tasks (global order)
+  const projCol = projectColor(t.projectId);
   const allActive = activeTasks();
   const globalIdx = allActive.findIndex(x=>x.id===t.id);
   const isFirst = globalIdx === 0;
   const isLast = globalIdx === allActive.length - 1;
-  return `<div class="task-card status-${t.status}" data-id="${t.id}" onclick="openTaskModal('${t.id}')">
+  return `<div class="task-card status-${t.status}" data-id="${t.id}" onclick="openTaskModal('${t.id}')" style="--card-proj-color:${projCol}">
     <div class="task-card-top">
       <div class="reorder-handles" onclick="event.stopPropagation()">
         <button class="reorder-btn" ${isFirst?'disabled':''} onclick="event.stopPropagation();moveTask('${t.id}',-1)" title="Sposta su">▲</button>
@@ -2683,7 +2714,7 @@ function taskCardHtml(t) {
       ${tp?`<span class="type-badge" style="background:${tp.color}18;color:${tp.color};border:1px solid ${tp.color}30;flex-shrink:0">${escHtml(tp.name)}</span>`:''}
     </div>
     <div class="task-card-meta">
-      ${t.assignee?`<div class="avatar-sm" style="background:${avatarColor(t.assignee)}">${escHtml(initials(t.assignee))}</div><span class="assignee-name">${escHtml(t.assignee)}</span>`:''}
+      ${t.assignee?`<div class="avatar-sm" style="background:${avatarColor(t.assignee)};width:18px;height:18px;font-size:7px">${escHtml(initials(t.assignee))}</div><span class="assignee-name" style="font-size:11px;color:var(--text-faint)">${escHtml(t.assignee)}</span>`:''}
       ${t.assignee&&t.due?`<div class="meta-sep"></div>`:''}
       ${t.due?`<span class="date-chip ${overdue?'overdue':''}"><svg viewBox="0 0 12 12" fill="none" width="10" height="10" stroke="currentColor" stroke-width="1.3" style="flex-shrink:0"><rect x="1" y="2" width="10" height="9" rx="1.5"/><path d="M4 1v2M8 1v2M1 5h10"/></svg> ${fmtDate(t.due)}</span>`:''}
       <div class="meta-spacer"></div>
@@ -2713,7 +2744,7 @@ function renderBoard() {
   el.innerHTML = cols.map(col => {
     const tasks = filteredSortedTasks(tasksByStatus(col.id));
     return `<div class="board-col" data-col="${col.id}" ondragover="onDragOver(event,'${col.id}')" ondrop="onDrop(event,'${col.id}')" ondragleave="onDragLeave(event)">
-      <div class="board-col-header"><span class="col-title ${col.id}">${col.label}</span><span class="col-count">${tasks.length}</span></div>
+      <div class="board-col-header ${col.id}"><span class="col-title ${col.id}">${col.label}</span><span class="col-count">${tasks.length}</span></div>
       <button class="board-add" onclick="addTaskInStatus('${col.id}')"><span style="font-size:16px;color:var(--accent)">+</span> aggiungi task</button>
       <div class="board-cards" id="cards-${col.id}">${tasks.map(t=>cardHtml(t)).join('')}</div>
     </div>`;
@@ -2783,12 +2814,12 @@ function renderBoard() {
 function cardHtml(t) {
   const overdue = t.due && isOverdue(t.due) && t.status!=='done';
   const tp = getTaskType(t.type||'');
-  // Position among same-status tasks in active project
+  const projCol = projectColor(t.projectId);
   const sameStatus = filteredSortedTasks(tasksByStatus(t.status));
   const idx = sameStatus.findIndex(x=>x.id===t.id);
   const isFirst = idx === 0;
   const isLast = idx === sameStatus.length - 1;
-  return `<div class="board-card" data-id="${t.id}">
+  return `<div class="board-card" data-id="${t.id}" style="--card-proj-color:${projCol}">
     ${tp?`<div style="margin-bottom:6px"><span class="type-badge" style="background:${tp.color}18;color:${tp.color};border:1px solid ${tp.color}30">${escHtml(tp.name)}</span></div>`:''}
     <div class="card-title ${t.status==='done'?'done':''}">${escHtml(t.title)}</div>
     <div class="card-footer">
@@ -2815,7 +2846,8 @@ function addTaskInStatus(status) { const id=createTask('',status); openTaskModal
 // Because labels and day-cells live in the SAME table-row,
 // their heights are always identical — no overlap possible.
 
-function ganttRowHtml(t, rowIdx, totalRows, labelW, totalW, startD, daygridHtml, showProjDot, projColor) {
+function ganttSplitRowHtml(t, rowIdx, totalRows, totalW, startD, daygridHtml, showProjDot, projColor) {
+  // Bar HTML
   let barHtml = '';
   if (t.start || t.due) {
     const s = t.start || t.due, e = t.due || t.start;
@@ -2825,17 +2857,11 @@ function ganttRowHtml(t, rowIdx, totalRows, labelW, totalW, startD, daygridHtml,
     const barWidth   = spanDays * DAY_W - 4;
     const tp = getTaskType(t.type || '');
     let barBg, barShadow = 'none';
-    if (tp) {
-      barBg = tp.color;
-    } else if (t.status === 'done') {
-      barBg = '#d0d0d0';
-    } else if (t.status === 'inprogress') {
-      barBg = 'var(--inprogress-color)';
-    } else if (showProjDot && projColor) {
-      barBg = projColor;
-    } else {
-      barBg = 'var(--accent)';
-    }
+    if (tp)                          { barBg = tp.color; }
+    else if (t.status === 'done')    { barBg = '#d0d0d0'; }
+    else if (t.status === 'inprogress') { barBg = 'var(--inprogress-color)'; }
+    else if (showProjDot && projColor)  { barBg = projColor; }
+    else                             { barBg = 'var(--accent)'; }
     const avatarHtml = t.assignee
       ? `<span class="gantt-bar-avatar" style="background:${avatarColor(t.assignee)}">${escHtml(initials(t.assignee))}</span>`
       : '';
@@ -2853,20 +2879,27 @@ function ganttRowHtml(t, rowIdx, totalRows, labelW, totalW, startD, daygridHtml,
   const isFirst = rowIdx === 0;
   const isLast  = rowIdx === totalRows - 1;
   const dotHtml = showProjDot && projColor ? `<span class="gantt-proj-badge" style="background:${projColor}"></span>` : '';
-  return `<div class="gantt-row" data-id="${t.id}" draggable="true">
-    <div class="gantt-label-cell" onclick="openTaskModal('${t.id}')">
-      <div class="gantt-row-handles" onclick="event.stopPropagation()">
-        <button class="gantt-row-btn" ${isFirst?'disabled':''} onclick="moveTask('${t.id}',-1)" title="Sposta su">▲</button>
-        <button class="gantt-row-btn" ${isLast?'disabled':''} onclick="moveTask('${t.id}',1)" title="Sposta giù">▼</button>
-      </div>
-      ${dotHtml}
-      <span class="g-title ${t.status==='done'?'done':''}" style="min-width:0;overflow:hidden;text-overflow:ellipsis">${escHtml(t.title)}</span>
+
+  const lHtml = `<div class="gantt-label-cell" data-id="${t.id}" onclick="openTaskModal('${t.id}')" style="height:44px;width:100%;box-sizing:border-box;border-bottom:1px solid var(--border-light)">
+    <div class="gantt-row-handles" onclick="event.stopPropagation()">
+      <button class="gantt-row-btn" ${isFirst?'disabled':''} onclick="moveTask('${t.id}',-1)" title="Sposta su">▲</button>
+      <button class="gantt-row-btn" ${isLast?'disabled':''} onclick="moveTask('${t.id}',1)" title="Sposta giù">▼</button>
     </div>
-    <div class="gantt-timeline" style="width:${totalW}px;min-width:${totalW}px">
-      <div class="gantt-daygrid" style="position:absolute;inset:0;pointer-events:none;overflow:hidden">${daygridHtml}</div>
-      ${barHtml}
-    </div>
+    ${dotHtml}
+    <span class="g-title ${t.status==='done'?'done':''}">${escHtml(t.title)}</span>
   </div>`;
+
+  const tHtml = `<div class="gantt-timeline" data-id="${t.id}" draggable="true" style="width:${totalW}px;height:44px;border-bottom:1px solid var(--border-light)">
+    <div class="gantt-daygrid" style="position:absolute;inset:0;pointer-events:none;overflow:hidden">${daygridHtml}</div>
+    ${barHtml}
+  </div>`;
+
+  return { lHtml, tHtml };
+}
+
+function ganttRowHtml(t, rowIdx, totalRows, labelW, totalW, startD, daygridHtml, showProjDot, projColor) {
+  const { lHtml, tHtml } = ganttSplitRowHtml(t, rowIdx, totalRows, totalW, startD, daygridHtml, showProjDot, projColor);
+  return lHtml + tHtml;
 }
 
 function renderGantt() {
@@ -2987,10 +3020,45 @@ function renderGantt() {
     });
   }
 
+  // Build label-only rows and timeline-only rows separately
+  let labelRowsHtml = '';
+  let timelineRowsHtml = '';
+
+  if (isMultiProject) {
+    visibleProjectIds.forEach(projId => {
+      const proj = state.projects.find(p => p.id === projId);
+      if (!proj) return;
+      const projTasks = all.filter(t => t.projectId === projId);
+      if (projTasks.length === 0) return;
+      const col = projectColor(projId);
+      // Section header — label side
+      labelRowsHtml += `<div style="height:28px;display:flex;align-items:center;gap:7px;padding:0 12px;background:${col}12;border-bottom:1px solid ${col}30;font-size:10px;font-weight:700;color:${col};letter-spacing:0.06em;text-transform:uppercase;flex-shrink:0;box-sizing:border-box;border-right:1px solid var(--border)">
+        <span style="width:8px;height:8px;border-radius:50%;background:${col};flex-shrink:0"></span>${escHtml(proj.name)}
+      </div>`;
+      // Section header — timeline side
+      timelineRowsHtml += `<div style="height:28px;width:${totalW}px;background:${col}12;border-bottom:1px solid ${col}30;flex-shrink:0;position:relative;overflow:hidden">
+        <div style="position:absolute;inset:0;pointer-events:none">${daygridHtml}</div>
+      </div>`;
+      projTasks.forEach(t => {
+        const rowIdx = globalRowIdx++;
+        const {lHtml, tHtml} = ganttSplitRowHtml(t, rowIdx, totalRows, totalW, startD, daygridHtml, true, col);
+        labelRowsHtml += lHtml;
+        timelineRowsHtml += tHtml;
+      });
+    });
+  } else {
+    all.forEach((t, rowIdx) => {
+      globalRowIdx++;
+      const {lHtml, tHtml} = ganttSplitRowHtml(t, rowIdx, totalRows, totalW, startD, daygridHtml, false, null);
+      labelRowsHtml += lHtml;
+      timelineRowsHtml += tHtml;
+    });
+  }
+
   el.innerHTML = `
-    <div class="gantt-header-wrap" style="display:flex;flex-shrink:0;background:var(--surface2);border-bottom:1px solid var(--border);overflow:hidden" id="gantt-head-outer">
-      <div class="gantt-head-label-fixed" style="width:${labelW}px;min-width:${labelW}px;flex-shrink:0;border-right:1px solid var(--border);z-index:2">
-        <div style="height:28px;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 10px;font-size:10px;font-weight:700;color:var(--text-faint);text-transform:uppercase;letter-spacing:.06em"></div>
+    <div style="display:flex;flex-shrink:0;background:var(--surface2);border-bottom:1px solid var(--border)" id="gantt-head-outer">
+      <div style="width:${labelW}px;min-width:${labelW}px;flex-shrink:0;border-right:1px solid var(--border)">
+        <div style="height:28px;border-bottom:1px solid var(--border)"></div>
         <div style="height:40px;display:flex;align-items:center;padding:0 10px;font-size:10px;font-weight:600;color:var(--text-faint);text-transform:uppercase;letter-spacing:.06em">Task</div>
       </div>
       <div id="gantt-head-scroll" style="overflow:hidden;flex:1">
@@ -2998,20 +3066,34 @@ function renderGantt() {
         <div style="width:${totalW}px;display:flex">${dayHtml}</div>
       </div>
     </div>
-    <div class="gantt-scroll" id="gantt-scroll">
-      <div style="display:flex;flex-direction:column;min-width:${labelW + totalW}px;width:max-content">
-        ${bodyRowsHtml}
+    <div style="flex:1;display:flex;overflow:hidden;position:relative">
+      <!-- LABEL PANEL — fixed left, vertical scroll synced with timeline -->
+      <div id="gantt-label-panel" style="width:${labelW}px;min-width:${labelW}px;flex-shrink:0;overflow:hidden;border-right:1px solid var(--border);box-shadow:3px 0 6px rgba(0,0,0,0.04);z-index:2;background:var(--surface)">
+        <div id="gantt-label-inner" style="display:flex;flex-direction:column;will-change:transform">
+          ${labelRowsHtml}
+        </div>
+      </div>
+      <!-- TIMELINE PANEL — scrolls both axes -->
+      <div id="gantt-scroll" style="flex:1;overflow:auto;scrollbar-width:thin;scrollbar-color:#d5d5d5 var(--surface2)">
+        <div style="display:flex;flex-direction:column;width:${totalW}px">
+          ${timelineRowsHtml}
+        </div>
       </div>
     </div>`;
 
-  // Sync header scroll with body scroll (Fix 3 improvement)
+  // Sync horizontal header and label panel with timeline scroll
   const scroll = document.getElementById('gantt-scroll');
   const headScroll = document.getElementById('gantt-head-scroll');
+  const labelInner = document.getElementById('gantt-label-inner');
   if (scroll && headScroll) {
-    scroll.addEventListener('scroll', () => { headScroll.scrollLeft = scroll.scrollLeft; }, {passive:true});
-    // Fix 6: scroll to today on open
+    scroll.addEventListener('scroll', () => {
+      headScroll.scrollLeft = scroll.scrollLeft;
+      // Move label panel vertically via transform — smooth and reliable
+      if (labelInner) labelInner.style.transform = `translateY(-${scroll.scrollTop}px)`;
+    }, {passive:true});
+    // Scroll to today on open
     const todayIdx = daysBetween(startD, tod);
-    scroll.scrollLeft = Math.max(0, todayIdx * DAY_W - (scroll.clientWidth - labelW) / 2 + DAY_W);
+    scroll.scrollLeft = Math.max(0, todayIdx * DAY_W - (scroll.clientWidth) / 2 + DAY_W);
   }
 
   // Fix 7: mobile touch resize/move on gantt bars
@@ -3122,72 +3204,37 @@ function _startGanttTouchDrag(bar, taskId, mode, startClientX) {
   document.addEventListener('touchend', onEnd);
 }
 
-// Fix 3: Drag-and-drop per riordinare le righe del Gantt
+// Fix 3: Drag-and-drop per riordinare le righe del Gantt (ora sulle label)
 let _ganttRowDragId = null;
 function ganttSetupRowDrag() {
+  const labelPanel = document.getElementById('gantt-label-inner');
   const scroll = document.getElementById('gantt-scroll');
-  if (!scroll) return;
-  const rows = [...scroll.querySelectorAll('.gantt-row[data-id]')];
-  rows.forEach(row => {
-    row.addEventListener('dragstart', e => {
-      _ganttRowDragId = row.dataset.id;
+  if (!labelPanel || !scroll) return;
+  const cells = [...labelPanel.querySelectorAll('.gantt-label-cell[data-id]')];
+  cells.forEach(cell => {
+    cell.draggable = true;
+    cell.addEventListener('dragstart', e => {
+      _ganttRowDragId = cell.dataset.id;
       e.dataTransfer.effectAllowed = 'move';
-      setTimeout(() => row.classList.add('gantt-dragging'), 0);
+      setTimeout(() => cell.style.opacity = '0.35', 0);
     });
-    row.addEventListener('dragend', () => {
-      row.classList.remove('gantt-dragging');
-      scroll.querySelectorAll('.gantt-row').forEach(r => r.classList.remove('gantt-drag-over'));
+    cell.addEventListener('dragend', () => {
+      cell.style.opacity = '';
+      labelPanel.querySelectorAll('.gantt-label-cell').forEach(c => c.classList.remove('gantt-drag-over'));
       _ganttRowDragId = null;
     });
-    row.addEventListener('dragover', e => {
+    cell.addEventListener('dragover', e => {
       e.preventDefault();
-      if (!_ganttRowDragId || _ganttRowDragId === row.dataset.id) return;
-      scroll.querySelectorAll('.gantt-row').forEach(r => r.classList.remove('gantt-drag-over'));
-      row.classList.add('gantt-drag-over');
+      if (!_ganttRowDragId || _ganttRowDragId === cell.dataset.id) return;
+      labelPanel.querySelectorAll('.gantt-label-cell').forEach(c => c.classList.remove('gantt-drag-over'));
+      cell.classList.add('gantt-drag-over');
     });
-    row.addEventListener('dragleave', () => row.classList.remove('gantt-drag-over'));
-    row.addEventListener('drop', e => {
+    cell.addEventListener('dragleave', () => cell.classList.remove('gantt-drag-over'));
+    cell.addEventListener('drop', e => {
       e.preventDefault();
-      row.classList.remove('gantt-drag-over');
-      if (!_ganttRowDragId || _ganttRowDragId === row.dataset.id) return;
-      reorderTask(_ganttRowDragId, row.dataset.id);
-    });
-    // Mobile touch drag (up/down)
-    let tClone = null, tId = null, tTimer = null, tStartY = 0;
-    row.addEventListener('touchstart', ev => {
-      tId = row.dataset.id; tStartY = ev.touches[0].clientY;
-      tTimer = setTimeout(() => {
-        tClone = row.cloneNode(true);
-        tClone.style.cssText = `position:fixed;z-index:9999;pointer-events:none;opacity:0.8;
-          left:${row.getBoundingClientRect().left}px;top:${row.getBoundingClientRect().top}px;
-          width:${row.offsetWidth}px;background:var(--surface);
-          box-shadow:0 4px 20px rgba(0,0,0,0.18);`;
-        document.body.appendChild(tClone);
-        row.style.opacity = '0.35';
-      }, 400);
-    }, {passive:true});
-    row.addEventListener('touchmove', ev => {
-      clearTimeout(tTimer);
-      if (!tClone) return;
-      ev.preventDefault();
-      const ty = ev.touches[0].clientY;
-      tClone.style.top = (ty - 22) + 'px';
-      scroll.querySelectorAll('.gantt-row[data-id]').forEach(r => r.classList.remove('gantt-drag-over'));
-      const target = document.elementFromPoint(ev.touches[0].clientX, ty);
-      const tr = target && target.closest('.gantt-row[data-id]');
-      if (tr && tr !== row) tr.classList.add('gantt-drag-over');
-    }, {passive:false});
-    row.addEventListener('touchend', ev => {
-      clearTimeout(tTimer);
-      scroll.querySelectorAll('.gantt-row[data-id]').forEach(r => r.classList.remove('gantt-drag-over'));
-      if (tClone) {
-        tClone.remove(); tClone = null; row.style.opacity = '';
-        const ty = ev.changedTouches[0].clientY;
-        const target = document.elementFromPoint(ev.changedTouches[0].clientX, ty);
-        const tr = target && target.closest('.gantt-row[data-id]');
-        if (tr && tr !== row && tId) reorderTask(tId, tr.dataset.id);
-      }
-      tId = null;
+      cell.classList.remove('gantt-drag-over');
+      if (!_ganttRowDragId || _ganttRowDragId === cell.dataset.id) return;
+      reorderTask(_ganttRowDragId, cell.dataset.id);
     });
   });
 }
