@@ -3012,8 +3012,7 @@ function taskCardHtml(t) {
       ${tp?`<span class="type-badge" style="background:${tp.color}18;color:${tp.color};border:1px solid ${tp.color}30;flex-shrink:0">${escHtml(tp.name)}</span>`:''}
     </div>
     <div class="task-card-meta">
-      ${t.assignee?`<div class="avatar-sm" style="background:${avatarColor(t.assignee)};width:18px;height:18px;font-size:7px">${escHtml(initials(t.assignee))}</div><span class="assignee-name" style="font-size:11px;color:var(--text-faint)">${escHtml(t.assignee)}</span>`:''}
-      ${t.assignee&&t.due?`<div class="meta-sep"></div>`:''}
+      ${t.assignee?`<div class="avatar-sm" style="background:${avatarColor(t.assignee)};width:20px;height:20px;font-size:8px;font-weight:700">${escHtml(initials(t.assignee))}</div>`:''}
       ${t.due?`<span class="date-chip ${overdue?'overdue':''}"><svg viewBox="0 0 12 12" fill="none" width="10" height="10" stroke="currentColor" stroke-width="1.3" style="flex-shrink:0"><rect x="1" y="2" width="10" height="9" rx="1.5"/><path d="M4 1v2M8 1v2M1 5h10"/></svg> ${fmtDate(t.due)}</span>`:''}
       <div class="meta-spacer"></div>
       ${statusPill(t.status)}
