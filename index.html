@@ -401,6 +401,21 @@ body {
 .task-check:active { transform: scale(0.85); }
 .task-check.checked { background: var(--done-color); border-color: var(--done-color); }
 .task-check.checked::after { content: ''; display: block; width: 9px; height: 6px; border-left: 1.5px solid #fff; border-bottom: 1.5px solid #fff; transform: rotate(-45deg) translate(1px,-1px); }
+
+/* Assignee avatar in task top row (replaces checkbox when assigned) */
+.task-assignee-avatar {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 8px; font-weight: 700;
+  font-family: var(--sans);
+  color: white;
+  flex-shrink: 0;
+  cursor: pointer;
+  margin-top: 1px;
+  transition: opacity 0.12s;
+}
+.task-assignee-avatar:active { opacity: 0.75; }
 .task-card-title {
   flex: 1;
   min-width: 0;
@@ -2129,7 +2144,6 @@ input, textarea, select, button {
     width: 24px; height: 24px;
     border-radius: 50%;
     border: 1.5px solid var(--border);
-    /* 44px tap target via padding */
     padding: 10px;
     margin: -10px -4px -10px -10px;
     box-sizing: content-box;
@@ -2139,8 +2153,14 @@ input, textarea, select, button {
     background: var(--done-color);
     border-color: var(--done-color);
   }
-  .task-check.checked::after {
-    width: 10px; height: 7px;
+  .task-check.checked::after { width: 10px; height: 7px; }
+
+  .task-assignee-avatar {
+    width: 26px; height: 26px;
+    font-size: 9px;
+    padding: 8px;
+    margin: -8px -4px -8px -8px;
+    box-sizing: content-box;
   }
 
   /* ── 3. GERARCHIA TIPOGRAFICA — titolo + metadati su righe separate ── */
@@ -2155,11 +2175,16 @@ input, textarea, select, button {
     line-height: 1.3;
   }
   .task-card-meta {
-    padding-left: 44px; /* allineato sotto il titolo, non sotto il checkbox */
-    gap: 8px;
-    margin-top: -2px;
+    padding-left: 46px; /* allineato sotto il titolo, dopo grip+checkbox */
+    gap: 6px;
+    margin-top: 0;
+    align-items: center;
   }
-  .assignee-name { font-size: 12px; color: var(--text-faint); }
+  .task-card-meta .avatar-sm {
+    width: 18px !important; height: 18px !important;
+    font-size: 7px !important;
+    font-weight: 700 !important;
+  }
   .date-chip { font-size: 11px; }
 
   /* ── 4. FAB + in basso a destra ── */
@@ -2999,6 +3024,10 @@ function taskCardHtml(t) {
   const globalIdx = allActive.findIndex(x=>x.id===t.id);
   const isFirst = globalIdx === 0;
   const isLast = globalIdx === allActive.length - 1;
+  // Assignee avatar — shown in top row on mobile (replaces checkbox visually)
+  const assigneeAvatar = t.assignee
+    ? `<div class="task-assignee-avatar" style="background:${avatarColor(t.assignee)}" onclick="event.stopPropagation();toggleDone('${t.id}')">${escHtml(initials(t.assignee))}</div>`
+    : `<div class="task-check ${t.status==='done'?'checked':''}" onclick="event.stopPropagation();toggleDone('${t.id}')"></div>`;
   return `<div class="task-card status-${t.status}" data-id="${t.id}" onclick="openTaskModal('${t.id}')" style="--card-proj-color:${projCol}">
     <div class="task-card-top">
       <div class="reorder-handles" onclick="event.stopPropagation()">
@@ -3007,12 +3036,11 @@ function taskCardHtml(t) {
           <span></span><span></span><span></span>
         </div>
       </div>
-      <div class="task-check ${t.status==='done'?'checked':''}" onclick="event.stopPropagation();toggleDone('${t.id}')"></div>
+      ${assigneeAvatar}
       <div class="task-card-title ${t.status==='done'?'done':''}">${escHtml(t.title)}</div>
       ${tp?`<span class="type-badge" style="background:${tp.color}18;color:${tp.color};border:1px solid ${tp.color}30;flex-shrink:0">${escHtml(tp.name)}</span>`:''}
     </div>
     <div class="task-card-meta">
-      ${t.assignee?`<div class="avatar-sm" style="background:${avatarColor(t.assignee)};width:20px;height:20px;font-size:8px;font-weight:700">${escHtml(initials(t.assignee))}</div>`:''}
       ${t.due?`<span class="date-chip ${overdue?'overdue':''}"><svg viewBox="0 0 12 12" fill="none" width="10" height="10" stroke="currentColor" stroke-width="1.3" style="flex-shrink:0"><rect x="1" y="2" width="10" height="9" rx="1.5"/><path d="M4 1v2M8 1v2M1 5h10"/></svg> ${fmtDate(t.due)}</span>`:''}
       <div class="meta-spacer"></div>
       ${statusPill(t.status)}
