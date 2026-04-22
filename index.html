@@ -2027,7 +2027,22 @@ input, textarea, select, button {
   width: 1px; height: 16px; background: var(--border); flex-shrink: 0;
 }
 
-/* ── DESKTOP LIST OPTIMISATION ── */
+/* ── TABLE STATUS FILTER BAR ── */
+#table-status-filter-bar {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  box-sizing: border-box;
+  flex-wrap: nowrap;
+}
+#table-status-filter-bar::-webkit-scrollbar { display: none; }
+#table-status-filter-bar.visible { display: flex; }
 @media (min-width: 600px) {
   #view-list { padding: 16px 24px; max-width: 900px; margin: 0 auto; }
   .task-card { flex-direction: row; align-items: center; gap: 14px; padding: 12px 18px; }
@@ -2285,12 +2300,21 @@ input, textarea, select, button {
   <div id="filter-sort-bar">
     <svg viewBox="0 0 16 16" fill="none" width="14" height="14" stroke="currentColor" stroke-width="1.5" style="flex-shrink:0;color:var(--text-faint)"><circle cx="8" cy="5" r="2.5"/><path d="M3 13c0-2.76 2.24-5 5-5s5 2.24 5 5"/></svg>
     <div id="assignee-chips" style="display:flex;gap:6px;flex-shrink:0"></div>
+    <div class="filter-sep" id="list-proj-sep"></div>
+    <svg viewBox="0 0 16 16" fill="none" width="13" height="13" stroke="currentColor" stroke-width="1.5" style="flex-shrink:0;color:var(--text-faint)" id="list-proj-icon"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" transform="scale(0.72) translate(2,2)"/><path d="M2 6h4l2 2h6a1 1 0 011 1v6a1 1 0 01-1 1H2a1 1 0 01-1-1V7a1 1 0 011-1z"/></svg>
+    <div id="list-project-chips" style="display:flex;gap:6px;flex-shrink:0"></div>
   </div>
 
   <!-- PROJECT FILTER BAR (gantt only) -->
   <div id="project-filter-bar">
     <svg viewBox="0 0 16 16" fill="none" width="13" height="13" stroke="currentColor" stroke-width="1.5" style="flex-shrink:0;color:var(--text-faint)"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M5 3V2M11 3V2"/></svg>
     <div id="project-chips" style="display:flex;gap:6px;flex-shrink:0"></div>
+  </div>
+
+  <!-- TABLE STATUS FILTER BAR (tab Progetti) -->
+  <div id="table-status-filter-bar">
+    <svg viewBox="0 0 16 16" fill="none" width="13" height="13" stroke="currentColor" stroke-width="1.5" style="flex-shrink:0;color:var(--text-faint)"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>
+    <div id="table-status-chips" style="display:flex;gap:6px;flex-shrink:0"></div>
   </div>
 
   <!-- CONTENT -->
@@ -2595,6 +2619,8 @@ let _saveTimer  = null;  // debounce write
 let _sseSource  = null;  // EventSource per sync realtime
 let _filterAssignee = '';   // '' = tutti
 let _filterProjects = [];   // [] = tutti i progetti visibili nel gantt
+let _filterProjectStatus = '';  // '' = tutti gli stati progetto (tab Progetti)
+let _filterListProjects = [];   // [] = solo progetto attivo; ['all'] = tutti; [id,...] = selezione
 
 // ── INDICATORE DI SYNC ──────────────────────────────────────────
 function showSync(icon, msg, color) {
@@ -2916,7 +2942,7 @@ function renderProjectsPanel() {
     </div>`;
   }).join('');
 }
-function selectProject(id) { state.activeProjectId=id; _filterAssignee=''; save(); updateHeader(); renderCurrentView(); updateBoardBadge(); }
+function selectProject(id) { state.activeProjectId=id; _filterAssignee=''; _filterListProjects=[]; save(); updateHeader(); renderCurrentView(); updateBoardBadge(); }
 
 // ── RENAME PROJECT ──
 function openRenameProject(projectId) {
@@ -2960,6 +2986,10 @@ function switchView(v) {
   const pfBar = document.getElementById('project-filter-bar');
   if (v==='gantt') { pfBar.classList.add('visible'); renderProjectFilterBar(); }
   else { pfBar.classList.remove('visible'); }
+  // Show table status filter bar only on table view
+  const tsfBar = document.getElementById('table-status-filter-bar');
+  if (v==='table') { tsfBar.classList.add('visible'); renderTableStatusFilterBar(); }
+  else { tsfBar.classList.remove('visible'); }
   renderCurrentView();
   updateBoardBadge();
 }
@@ -2989,31 +3019,64 @@ function renderList() {
   renderFilterBar();
   const el = document.getElementById('view-list');
   if (!state.activeProjectId) { el.innerHTML=emptyState('<svg viewBox="0 0 24 24" fill="none" width="32" height="32" stroke="currentColor" stroke-width="1.2"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg>','Nessun progetto','Apri il menu progetti per crearne uno'); return; }
-  const allTasks = activeTasks();
+
+  const isMultiProject = _filterListProjects.length > 0;
+  const allTasks = listScopedTasks();
+
   if (allTasks.length===0) { el.innerHTML=emptyState('<svg viewBox="0 0 24 24" fill="none" width="32" height="32" stroke="currentColor" stroke-width="1.2"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 12l3 3 5-5"/></svg>','Nessun task','Tocca + per aggiungere il primo task'); return; }
 
   const tasks = filteredSortedTasks(allTasks);
 
-  const groups = [
-    { id:'todo', label:'Da fare', tasks: tasks.filter(t=>t.status==='todo') },
-    { id:'inprogress', label:'In corso', tasks: tasks.filter(t=>t.status==='inprogress') },
-    { id:'done', label:'Completati', tasks: tasks.filter(t=>t.status==='done') },
-  ].filter(g=>g.tasks.length>0);
+  let content = '';
 
-  let content = groups.map(g => `
-    <div class="section-label">${g.label} <span style="color:var(--text-faint);font-weight:400;text-transform:none;letter-spacing:0;font-size:11px">${g.tasks.length}</span></div>
-    ${g.tasks.map(t => taskCardHtml(t)).join('')}
-  `).join('');
+  if (isMultiProject) {
+    // Group by project, then by status within each project
+    const projectIds = _filterListProjects.length > 0
+      ? _filterListProjects
+      : state.projects.map(p => p.id);
+    projectIds.forEach(pid => {
+      const proj = state.projects.find(p => p.id === pid);
+      if (!proj) return;
+      const projTasks = tasks.filter(t => t.projectId === pid);
+      if (projTasks.length === 0) return;
+      const col = projectColor(pid);
+      content += `<div class="section-label" style="color:${col};border-bottom-color:${col}30">
+        <span style="width:8px;height:8px;border-radius:50%;background:${col};display:inline-block;flex-shrink:0"></span>
+        ${escHtml(proj.name)}
+        <span style="color:var(--text-faint);font-weight:400;text-transform:none;letter-spacing:0;font-size:11px">${projTasks.length}</span>
+      </div>`;
+      const groups = [
+        { id:'todo', label:'Da fare', tasks: projTasks.filter(t=>t.status==='todo') },
+        { id:'inprogress', label:'In corso', tasks: projTasks.filter(t=>t.status==='inprogress') },
+        { id:'done', label:'Completati', tasks: projTasks.filter(t=>t.status==='done') },
+      ].filter(g=>g.tasks.length>0);
+      groups.forEach(g => {
+        content += `<div class="section-label" style="font-size:9px;padding-top:4px;padding-bottom:0">${g.label} <span style="color:var(--text-faint);font-weight:400;text-transform:none;letter-spacing:0;font-size:10px">${g.tasks.length}</span></div>`;
+        content += g.tasks.map(t => taskCardHtml(t)).join('');
+      });
+    });
+  } else {
+    // Single project mode (default) — group by status
+    const groups = [
+      { id:'todo', label:'Da fare', tasks: tasks.filter(t=>t.status==='todo') },
+      { id:'inprogress', label:'In corso', tasks: tasks.filter(t=>t.status==='inprogress') },
+      { id:'done', label:'Completati', tasks: tasks.filter(t=>t.status==='done') },
+    ].filter(g=>g.tasks.length>0);
+    content = groups.map(g => `
+      <div class="section-label">${g.label} <span style="color:var(--text-faint);font-weight:400;text-transform:none;letter-spacing:0;font-size:11px">${g.tasks.length}</span></div>
+      ${g.tasks.map(t => taskCardHtml(t)).join('')}
+    `).join('');
+  }
 
-  if (!content && _filterAssignee) {
-    el.innerHTML = emptyState('<svg viewBox="0 0 24 24" fill="none" width="32" height="32" stroke="currentColor" stroke-width="1.2"><circle cx="10" cy="10" r="6"/><path d="M14.5 14.5L20 20"/></svg>','Nessun task per questo assegnatario','');
+  if (!content && (_filterAssignee || isMultiProject)) {
+    el.innerHTML = emptyState('<svg viewBox="0 0 24 24" fill="none" width="32" height="32" stroke="currentColor" stroke-width="1.2"><circle cx="10" cy="10" r="6"/><path d="M14.5 14.5L20 20"/></svg>','Nessun task trovato','Prova a cambiare i filtri');
     return;
   }
 
   el.innerHTML = content + `<div class="add-task-btn" onclick="openTaskModal(null)"><span style="font-size:18px;line-height:1;color:var(--accent)">+</span>Aggiungi task</div>`;
 
-  // Enable manual drag reorder
-  enableListReorder();
+  // Enable manual drag reorder (only in single-project mode)
+  if (!isMultiProject) enableListReorder();
 }
 
 function taskCardHtml(t) {
@@ -3802,9 +3865,15 @@ let _tblStatusDropdownPid = null;
 
 function renderTable() {
   const el = document.getElementById('view-table');
-  const projs = state.projects;
+  let projs = state.projects;
+  if (_filterProjectStatus) {
+    projs = projs.filter(p => (p.projectStatus || '') === _filterProjectStatus);
+  }
   if (!projs.length) {
-    el.innerHTML = `<div class="table-empty">Nessun progetto. Creane uno per iniziare.</div>`;
+    const msg = _filterProjectStatus
+      ? `Nessun progetto con stato "${_filterProjectStatus}".`
+      : 'Nessun progetto. Creane uno per iniziare.';
+    el.innerHTML = `<div class="table-empty">${msg}</div>`;
     return;
   }
   const statuses = getProjectStatuses();
@@ -3959,7 +4028,7 @@ function renderTable() {
 
   el.innerHTML = `<div class="table-wrap">
     <div class="table-toolbar">
-      <span class="table-toolbar-title">Progetti <span style="color:var(--text-faint);font-weight:400;font-size:13px">(${projs.length})</span></span>
+      <span class="table-toolbar-title">Progetti <span style="color:var(--text-faint);font-weight:400;font-size:13px">(${projs.length}${_filterProjectStatus ? ` · ${escHtml(_filterProjectStatus)}` : ''})</span></span>
       <div class="table-toolbar-right">
         <button onclick="openProjectModal()" style="display:inline-flex;align-items:center;gap:6px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-pill);padding:7px 16px;font-family:var(--sans);font-size:12px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(91,75,232,.25);transition:opacity .14s" onmouseenter="this.style.opacity='.85'" onmouseleave="this.style.opacity='1'">
           <svg viewBox="0 0 12 12" fill="none" width="10" height="10" stroke="currentColor" stroke-width="2"><path d="M6 1v10M1 6h10"/></svg>
@@ -3988,6 +4057,8 @@ function renderTable() {
   // close dropdown on outside click
   setTimeout(() => {
     document.addEventListener('click', _closeTblStatusDropdown, {once:true, capture:true});
+    // Refresh the status filter bar chips in case statuses changed
+    if (state.currentView === 'table') renderTableStatusFilterBar();
   }, 0);
 }
 
@@ -4356,10 +4427,22 @@ function updateTypeDisplay(id) {
 function getTaskType(id) { return (state.taskTypes||[]).find(t=>t.id===id)||null; }
 
 // ── FILTER & SORT ──
+
+// Returns the set of tasks in scope for the list view based on project filter
+function listScopedTasks() {
+  if (_filterListProjects.length === 0) {
+    return activeTasks();
+  }
+  return state.tasks.filter(t => _filterListProjects.includes(t.projectId));
+}
+
 function renderFilterBar() {
   const bar = document.getElementById('assignee-chips');
   if (!bar) return;
-  const assignees = [...new Set(activeTasks().map(t=>t.assignee).filter(Boolean))];
+
+  // Assignee chips — scoped to currently visible projects
+  const scopedTasks = listScopedTasks();
+  const assignees = [...new Set(scopedTasks.map(t=>t.assignee).filter(Boolean))];
   let html = `<div class="filter-chip ${_filterAssignee===''?'active':''}" onclick="setAssigneeFilter('')">Tutti</div>`;
   assignees.forEach(a => {
     const col = avatarColor(a);
@@ -4367,10 +4450,53 @@ function renderFilterBar() {
       <span class="chip-dot" style="background:${col}"></span>${escHtml(a)}</div>`;
   });
   bar.innerHTML = html;
+
+  // Project chips
+  const projBar = document.getElementById('list-project-chips');
+  if (!projBar) return;
+  if (state.projects.length <= 1) { projBar.innerHTML = ''; document.getElementById('list-proj-sep').style.display='none'; document.getElementById('list-proj-icon').style.display='none'; return; }
+  document.getElementById('list-proj-sep').style.display='';
+  document.getElementById('list-proj-icon').style.display='';
+  const allSelected = _filterListProjects.length === 0;
+  const allIds = state.projects.map(p => p.id);
+  const tuttiSelected = !allSelected && allIds.every(id => _filterListProjects.includes(id));
+  let phtml = `<div class="filter-chip ${allSelected?'active':''}" onclick="setListProjectFilter([])">Attivo</div>`;
+  phtml += `<div class="filter-chip ${tuttiSelected?'active':''}" onclick="setListProjectFilter([...state.projects.map(p=>p.id)])">Tutti</div>`;
+  state.projects.forEach(p => {
+    const col = projectColor(p.id);
+    const sel = _filterListProjects.includes(p.id) || (allSelected && p.id === state.activeProjectId);
+    phtml += `<div class="filter-chip ${sel?'active':''}"
+      style="${sel ? `background:${col};border-color:${col};color:#fff;` : ''}"
+      onclick="toggleListProjectFilter('${p.id}')">
+      <span class="chip-dot" style="background:${sel?'rgba(255,255,255,0.85)':col}"></span>
+      ${escHtml(p.name)}
+    </div>`;
+  });
+  projBar.innerHTML = phtml;
 }
 
 function setAssigneeFilter(name) {
   _filterAssignee = name;
+  renderCurrentView();
+  renderFilterBar();
+}
+
+function toggleListProjectFilter(id) {
+  if (_filterListProjects.includes(id)) {
+    _filterListProjects = _filterListProjects.filter(x => x !== id);
+    // Se non rimane nessun progetto selezionato, torna ad Attivo
+    if (_filterListProjects.length === 0) _filterListProjects = [];
+  } else {
+    _filterListProjects = [..._filterListProjects, id];
+  }
+  _filterAssignee = '';
+  renderCurrentView();
+  renderFilterBar();
+}
+
+function setListProjectFilter(ids) {
+  _filterListProjects = ids;
+  _filterAssignee = '';
   renderCurrentView();
   renderFilterBar();
 }
@@ -4421,6 +4547,32 @@ function ganttVisibleTasks() {
 function applySortFilter() {
   renderCurrentView();
   renderFilterBar();
+}
+
+// ── TABLE STATUS FILTER (tab Progetti) ──
+function renderTableStatusFilterBar() {
+  const bar = document.getElementById('table-status-chips');
+  if (!bar) return;
+  const statuses = getProjectStatuses();
+  // Only show statuses actually used by at least one project
+  const usedStatuses = statuses.filter(s => state.projects.some(p => p.projectStatus === s.name));
+  let html = `<div class="filter-chip ${_filterProjectStatus===''?'active':''}" onclick="setTableStatusFilter('')">Tutti</div>`;
+  usedStatuses.forEach(s => {
+    const col = s.color || '#9c988f';
+    html += `<div class="filter-chip ${_filterProjectStatus===s.name?'active':''}"
+      style="${_filterProjectStatus===s.name ? `background:${col};border-color:${col};` : ''}"
+      onclick="setTableStatusFilter('${escHtml(s.name)}')">
+      <span class="chip-dot" style="background:${_filterProjectStatus===s.name ? 'rgba(255,255,255,0.8)' : col}"></span>
+      ${escHtml(s.name)}
+    </div>`;
+  });
+  bar.innerHTML = html;
+}
+
+function setTableStatusFilter(status) {
+  _filterProjectStatus = status;
+  renderTableStatusFilterBar();
+  renderTable();
 }
 
 function filteredSortedTasks(tasks) {
