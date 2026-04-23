@@ -822,42 +822,6 @@ body {
 }
 
 /* ── PROJECT FILTER BAR (gantt only) ── */
-#project-filter-bar {
-  display: none;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  overflow-x: auto;
-  flex-shrink: 0;
-  scrollbar-width: none;
-}
-#project-filter-bar::-webkit-scrollbar { display: none; }
-#project-filter-bar.visible { display: flex; }
-
-.proj-filter-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 3px 9px;
-  border-radius: 5px;
-  font-family: var(--sans);
-  font-size: 11px;
-  font-weight: 500;
-  cursor: pointer;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--text-muted);
-  white-space: nowrap;
-  transition: all 0.1s ease;
-  flex-shrink: 0;
-}
-.proj-filter-chip.active {
-  color: white;
-  border-color: transparent;
-}
-.proj-filter-chip:hover { background: var(--surface2); }
 
 /* Gantt project label badge */
 .gantt-proj-badge {
@@ -2305,12 +2269,6 @@ input, textarea, select, button {
     <div id="list-project-chips" style="display:flex;gap:6px;flex-shrink:0"></div>
   </div>
 
-  <!-- PROJECT FILTER BAR (gantt only) -->
-  <div id="project-filter-bar">
-    <svg viewBox="0 0 16 16" fill="none" width="13" height="13" stroke="currentColor" stroke-width="1.5" style="flex-shrink:0;color:var(--text-faint)"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M5 3V2M11 3V2"/></svg>
-    <div id="project-chips" style="display:flex;gap:6px;flex-shrink:0"></div>
-  </div>
-
   <!-- TABLE STATUS FILTER BAR (tab Progetti) -->
   <div id="table-status-filter-bar">
     <svg viewBox="0 0 16 16" fill="none" width="13" height="13" stroke="currentColor" stroke-width="1.5" style="flex-shrink:0;color:var(--text-faint)"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>
@@ -2618,9 +2576,8 @@ let editingTaskId = null;
 let _saveTimer  = null;  // debounce write
 let _sseSource  = null;  // EventSource per sync realtime
 let _filterAssignee = '';   // '' = tutti
-let _filterProjects = [];   // [] = tutti i progetti visibili nel gantt
 let _filterProjectStatus = '';  // '' = tutti gli stati progetto (tab Progetti)
-let _filterListProjects = [];   // [] = solo progetto attivo; ['all'] = tutti; [id,...] = selezione
+let _filterListProjects = [];   // [] = solo progetto attivo; [id,...] = selezione multipla
 
 // ── INDICATORE DI SYNC ──────────────────────────────────────────
 function showSync(icon, msg, color) {
@@ -2982,10 +2939,6 @@ function switchView(v) {
   tableEl.style.display = v==='table' ? '' : 'none';
   // Hide filter bar on table view
   document.getElementById('filter-sort-bar').style.display = v==='table' ? 'none' : '';
-  // Show project filter bar only on gantt
-  const pfBar = document.getElementById('project-filter-bar');
-  if (v==='gantt') { pfBar.classList.add('visible'); renderProjectFilterBar(); }
-  else { pfBar.classList.remove('visible'); }
   // Show table status filter bar only on table view
   const tsfBar = document.getElementById('table-status-filter-bar');
   if (v==='table') { tsfBar.classList.add('visible'); renderTableStatusFilterBar(); }
@@ -3295,7 +3248,6 @@ function ganttRowHtml(t, rowIdx, totalRows, labelW, totalW, startD, daygridHtml,
 
 function renderGantt() {
   renderFilterBar();
-  renderProjectFilterBar();
   const el = document.getElementById('view-gantt');
   if (state.projects.length === 0) { el.innerHTML=emptyState('<svg viewBox="0 0 24 24" fill="none" width="32" height="32" stroke="currentColor" stroke-width="1.2"><rect x="3" y="12" width="4" height="9"/><rect x="10" y="7" width="4" height="14"/><rect x="17" y="3" width="4" height="18"/></svg>','Nessun progetto',''); return; }
 
@@ -3303,7 +3255,7 @@ function renderGantt() {
   const all = ganttVisibleTasks();
 
   // Determine if we're in multi-project mode
-  const visibleProjectIds = _filterProjects.length > 0 ? _filterProjects : state.projects.map(p => p.id);
+  const visibleProjectIds = _filterListProjects.length > 0 ? _filterListProjects : state.projects.map(p => p.id);
   const isMultiProject = visibleProjectIds.length > 1;
 
   // Compute date range
@@ -4501,44 +4453,9 @@ function setListProjectFilter(ids) {
   renderFilterBar();
 }
 
-// ── PROJECT FILTER (gantt) ──
-function renderProjectFilterBar() {
-  const bar = document.getElementById('project-chips');
-  if (!bar) return;
-  const allActive = _filterProjects.length === 0; // empty = tutti
-  let html = `<div class="proj-filter-chip ${allActive ? 'active' : ''}" style="${allActive ? 'background:var(--accent);' : ''}" onclick="setProjectFilter([])">Tutti</div>`;
-  state.projects.forEach(p => {
-    const col = projectColor(p.id);
-    const sel = _filterProjects.includes(p.id);
-    html += `<div class="proj-filter-chip ${sel ? 'active' : ''}"
-      style="${sel ? `background:${col};border-color:${col};` : ''}"
-      onclick="toggleProjectFilter('${p.id}')">
-      <span style="width:7px;height:7px;border-radius:50%;background:${sel ? 'rgba(255,255,255,0.7)' : col};display:inline-block;flex-shrink:0"></span>
-      ${escHtml(p.name)}
-    </div>`;
-  });
-  bar.innerHTML = html;
-}
-
-function toggleProjectFilter(id) {
-  if (_filterProjects.includes(id)) {
-    _filterProjects = _filterProjects.filter(x => x !== id);
-  } else {
-    _filterProjects = [..._filterProjects, id];
-  }
-  renderProjectFilterBar();
-  renderGantt();
-}
-
-function setProjectFilter(ids) {
-  _filterProjects = ids;
-  renderProjectFilterBar();
-  renderGantt();
-}
-
-// Returns tasks for gantt: respects project filter + assignee filter
+// Returns tasks for gantt: uses the same list project filter + assignee filter
 function ganttVisibleTasks() {
-  const projectIds = _filterProjects.length > 0 ? _filterProjects : state.projects.map(p => p.id);
+  const projectIds = _filterListProjects.length > 0 ? _filterListProjects : state.projects.map(p => p.id);
   let tasks = state.tasks.filter(t => projectIds.includes(t.projectId) && t.title && t.title.trim() !== '');
   if (_filterAssignee) tasks = tasks.filter(t => t.assignee === _filterAssignee);
   return tasks;
