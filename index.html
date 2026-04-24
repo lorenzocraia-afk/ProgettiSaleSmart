@@ -4124,6 +4124,9 @@ function openModalProjectPicker(card) {
   document.body.appendChild(dropdown);
   setTimeout(() => document.addEventListener('click', () => dropdown.remove(), {once:true}), 0);
 }
+
+// ── TASK MODAL ──
+function openTaskModal(taskId) {
   if (!state.activeProjectId) { openProjectModal(); return; }
   editingTaskId=taskId;
   const deleteBtn=document.getElementById('modal-delete-btn');
