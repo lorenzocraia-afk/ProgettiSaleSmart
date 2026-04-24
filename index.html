@@ -1117,11 +1117,13 @@ body {
   border-bottom: none;
   box-shadow: 0 -1px 0 var(--border), 0 -8px 24px rgba(0,0,0,0.07);
   z-index: 200;
-  animation: slideUp 0.18s cubic-bezier(0.34,1.1,0.64,1);
   padding-bottom: max(20px, var(--safe-bottom));
   max-height: 70vh;
   overflow-y: auto;
   overflow-x: hidden;
+}
+@media (max-width: 599px) {
+  .dropdown-panel { animation: slideUp 0.18s cubic-bezier(0.34,1.1,0.64,1); }
 }
 @media (min-width: 600px) {
   .dropdown-panel {
@@ -1138,9 +1140,13 @@ body {
     box-shadow: 0 8px 32px rgba(0,0,0,0.18);
     padding-bottom: 12px;
     max-height: 60vh;
-    animation: scaleIn 0.15s cubic-bezier(0.34,1.1,0.64,1);
+    animation: desktopPanelIn 0.14s ease forwards;
   }
   .dp-handle { display: none; }
+}
+@keyframes desktopPanelIn {
+  from { opacity: 0; transform: translate(-50%, calc(-50% + 10px)); }
+  to   { opacity: 1; transform: translate(-50%, -50%); }
 }
 .dropdown-panel::-webkit-scrollbar { width: 0; }
 .dp-handle { width: 32px; height: 3px; background: var(--surface3); border-radius: 2px; margin: 10px auto 4px; }
@@ -1423,8 +1429,10 @@ body {
   z-index: 300;
   display: none;
   padding-bottom: max(20px, var(--safe-bottom));
-  animation: slideUp 0.18s cubic-bezier(0.34,1.1,0.64,1);
   overflow: hidden;
+}
+@media (max-width: 599px) {
+  #datepicker-popup { animation: slideUp 0.18s cubic-bezier(0.34,1.1,0.64,1); }
 }
 @media (min-width: 600px) {
   #datepicker-popup {
@@ -1440,7 +1448,7 @@ body {
     border-bottom: 1px solid var(--border);
     box-shadow: 0 8px 32px rgba(0,0,0,0.18);
     padding-bottom: 12px;
-    animation: scaleIn 0.15s cubic-bezier(0.34,1.1,0.64,1);
+    animation: desktopPanelIn 0.15s cubic-bezier(0.2, 0, 0, 1) forwards;
   }
 }
 .dp-nav-row { display: flex; align-items: center; padding: 12px 20px; gap: 12px; }
