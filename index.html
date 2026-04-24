@@ -2582,6 +2582,12 @@ input, textarea, select, button {
           <div class="field-value placeholder" id="type-display">—</div>
           <input type="hidden" id="modal-type">
         </div>
+        <!-- PROGETTO -->
+        <div class="modal-field-card" id="modal-project-card" onclick="openModalProjectPicker(this)" style="width:100%">
+          <div class="field-label">Progetto</div>
+          <div class="field-value" id="modal-project-display">—</div>
+          <input type="hidden" id="modal-project-id">
+        </div>
         <div class="field-row">
           <!-- START DATE -->
           <div class="modal-field-card" id="start-display" onclick="openDatePicker('start',this)">
@@ -4076,8 +4082,48 @@ function dpSelectToday(){if(dpField)setDateVal(dpField,today());dpDismiss();}
 function dpClear(){if(dpField)setDateVal(dpField,'');dpDismiss();}
 function dpUpdateRangeHint(){if(document.getElementById('datepicker-popup').style.display!=='none')dpRender();}
 
-// ── TASK MODAL ──
-function openTaskModal(taskId) {
+function updateModalProjectDisplay(id) {
+  const proj = state.projects.find(p => p.id === id);
+  const display = document.getElementById('modal-project-display');
+  const input = document.getElementById('modal-project-id');
+  const card = document.getElementById('modal-project-card');
+  if (!display || !input) return;
+  input.value = id || '';
+  if (proj) {
+    const col = projectColor(proj.id);
+    display.innerHTML = `<span style="width:8px;height:8px;border-radius:50%;background:${col};display:inline-block;flex-shrink:0;margin-right:4px"></span>${escHtml(proj.name)}`;
+    display.classList.remove('placeholder');
+  } else {
+    display.innerHTML = '—';
+    display.classList.add('placeholder');
+  }
+  // Hide project picker when editing existing task (project can't change)
+  if (card) card.style.display = editingTaskId ? 'none' : '';
+}
+
+function openModalProjectPicker(card) {
+  // Build a quick inline dropdown
+  const existing = document.getElementById('modal-proj-dropdown');
+  if (existing) { existing.remove(); return; }
+  const dropdown = document.createElement('div');
+  dropdown.id = 'modal-proj-dropdown';
+  dropdown.style.cssText = `position:absolute;z-index:9999;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 8px 24px rgba(0,0,0,0.18);min-width:200px;padding:4px;`;
+  const rect = card.getBoundingClientRect();
+  dropdown.style.top = (rect.bottom + 4 + window.scrollY) + 'px';
+  dropdown.style.left = rect.left + 'px';
+  state.projects.forEach(p => {
+    const col = projectColor(p.id);
+    const item = document.createElement('div');
+    item.style.cssText = `display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:6px;cursor:pointer;font-size:13px;color:var(--text)`;
+    item.innerHTML = `<span style="width:8px;height:8px;border-radius:50%;background:${col};flex-shrink:0"></span>${escHtml(p.name)}`;
+    item.onmouseenter = () => item.style.background = 'var(--surface2)';
+    item.onmouseleave = () => item.style.background = '';
+    item.onclick = (e) => { e.stopPropagation(); updateModalProjectDisplay(p.id); dropdown.remove(); };
+    dropdown.appendChild(item);
+  });
+  document.body.appendChild(dropdown);
+  setTimeout(() => document.addEventListener('click', () => dropdown.remove(), {once:true}), 0);
+}
   if (!state.activeProjectId) { openProjectModal(); return; }
   editingTaskId=taskId;
   const deleteBtn=document.getElementById('modal-delete-btn');
@@ -4098,6 +4144,7 @@ function openTaskModal(taskId) {
     // Show archive button only for done tasks
     const archiveBtn = document.getElementById('modal-archive-btn');
     if (archiveBtn) archiveBtn.style.display = t.status==='done' ? '' : 'none';
+    updateModalProjectDisplay(t.projectId);
   } else {
     document.getElementById('modal-title').value='';
     document.getElementById('modal-desc').value='';
@@ -4112,6 +4159,7 @@ function openTaskModal(taskId) {
     const archiveBtn = document.getElementById('modal-archive-btn');
     if (archiveBtn) archiveBtn.style.display='none';
     editingTaskId=null;
+    updateModalProjectDisplay(state.activeProjectId);
   }
   setTimeout(()=>{ ['modal-title','modal-desc'].forEach(id=>{const el=document.getElementById(id);el.style.height='auto';el.style.height=el.scrollHeight+'px';}); },0);
   document.getElementById('task-modal-overlay').style.display='flex';
@@ -4134,7 +4182,8 @@ function saveTask(){
     _searchQuery = '';
     const si = document.getElementById('search-input');
     if (si) si.value = '';
-    state.tasks.push({id:uid(),projectId:state.activeProjectId,title,description:document.getElementById('modal-desc').value.trim(),status:document.getElementById('modal-status').value,assignee:document.getElementById('modal-assignee').value.trim(),type:document.getElementById('modal-type').value,start:_dates.start||'',due:_dates.due||''});
+    const projId = document.getElementById('modal-project-id')?.value || state.activeProjectId;
+    state.tasks.push({id:uid(),projectId:projId,title,description:document.getElementById('modal-desc').value.trim(),status:document.getElementById('modal-status').value,assignee:document.getElementById('modal-assignee').value.trim(),type:document.getElementById('modal-type').value,start:_dates.start||'',due:_dates.due||''});
   }
   save();closeTaskModal();renderCurrentView();updateBoardBadge();
 }
