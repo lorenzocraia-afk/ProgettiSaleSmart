@@ -2861,9 +2861,10 @@ function save() {
   try { localStorage.setItem('flow_v3_p2', JSON.stringify(state)); } catch(_) {}
   showSync('↻', 'Salvataggio...', 'neutral');
 
+  // Ignora subito qualsiasi SSE in arrivo — il nostro state locale è il più aggiornato
+  _ignoreSse = true;
   clearTimeout(_saveTimer);
   _saveTimer = setTimeout(async () => {
-    _ignoreSse = true;
     const tsAtSave = state._ts;
     try {
       const res = await fetch(RTDB_NODE, {
@@ -2882,7 +2883,7 @@ function save() {
     } finally {
       _saveTimer = null;
       // Aspetta che l'SSE rimbalzi il nostro stesso evento prima di riabilitare
-      setTimeout(()=>{ _ignoreSse = false; }, 1500);
+      setTimeout(()=>{ _ignoreSse = false; }, 2000);
     }
   }, 600);
 }
