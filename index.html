@@ -3330,10 +3330,16 @@ function renderList() {
 
   const isMultiProject = _filterListProjects.length > 0;
   const allTasks = listScopedTasks();
-
-  if (allTasks.length===0) { el.innerHTML=emptyState('<svg viewBox="0 0 24 24" fill="none" width="32" height="32" stroke="currentColor" stroke-width="1.2"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 12l3 3 5-5"/></svg>','Nessun task','Tocca + per aggiungere il primo task'); return; }
-
   const tasks = filteredSortedTasks(allTasks);
+
+  if (tasks.length === 0) {
+    if (allTasks.length === 0) {
+      el.innerHTML = emptyState('<svg viewBox="0 0 24 24" fill="none" width="32" height="32" stroke="currentColor" stroke-width="1.2"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 12l3 3 5-5"/></svg>','Nessun task','Tocca + per aggiungere il primo task') + `<div class="add-task-btn" onclick="openTaskModal(null)"><span style="font-size:18px;line-height:1;color:var(--accent)">+</span>Aggiungi task</div>`;
+    } else {
+      el.innerHTML = emptyState('<svg viewBox="0 0 24 24" fill="none" width="32" height="32" stroke="currentColor" stroke-width="1.2"><circle cx="10" cy="10" r="6"/><path d="M14.5 14.5L20 20"/></svg>','Nessun task trovato','Prova a cambiare i filtri');
+    }
+    return;
+  }
 
   let content = '';
 
@@ -3382,11 +3388,6 @@ function renderList() {
       html += g.tasks.map(t => taskCardHtml(t)).join('');
       return html;
     }).join('');
-  }
-
-  if (!content && (_filterAssignee || isMultiProject)) {
-    el.innerHTML = emptyState('<svg viewBox="0 0 24 24" fill="none" width="32" height="32" stroke="currentColor" stroke-width="1.2"><circle cx="10" cy="10" r="6"/><path d="M14.5 14.5L20 20"/></svg>','Nessun task trovato','Prova a cambiare i filtri');
-    return;
   }
 
   el.innerHTML = content + `<div class="add-task-btn" onclick="openTaskModal(null)"><span style="font-size:18px;line-height:1;color:var(--accent)">+</span>Aggiungi task</div>`;
@@ -4124,8 +4125,16 @@ function toggleModalDone(){const check=document.getElementById('modal-check');ch
 function saveTask(){
   const title=document.getElementById('modal-title').value.trim();
   if (!title){document.getElementById('modal-title').focus();return;}
-  if (editingTaskId){const t=state.tasks.find(t=>t.id===editingTaskId);if(t){t.title=title;t.description=document.getElementById('modal-desc').value.trim();t.status=document.getElementById('modal-status').value;t.assignee=document.getElementById('modal-assignee').value.trim();t.type=document.getElementById('modal-type').value;t.start=_dates.start||'';t.due=_dates.due||'';}}
-  else{state.tasks.push({id:uid(),projectId:state.activeProjectId,title,description:document.getElementById('modal-desc').value.trim(),status:document.getElementById('modal-status').value,assignee:document.getElementById('modal-assignee').value.trim(),type:document.getElementById('modal-type').value,start:_dates.start||'',due:_dates.due||''});}
+  if (editingTaskId){
+    const t=state.tasks.find(t=>t.id===editingTaskId);
+    if(t){t.title=title;t.description=document.getElementById('modal-desc').value.trim();t.status=document.getElementById('modal-status').value;t.assignee=document.getElementById('modal-assignee').value.trim();t.type=document.getElementById('modal-type').value;t.start=_dates.start||'';t.due=_dates.due||'';}
+  } else {
+    // New task — clear search so it's visible after save
+    _searchQuery = '';
+    const si = document.getElementById('search-input');
+    if (si) si.value = '';
+    state.tasks.push({id:uid(),projectId:state.activeProjectId,title,description:document.getElementById('modal-desc').value.trim(),status:document.getElementById('modal-status').value,assignee:document.getElementById('modal-assignee').value.trim(),type:document.getElementById('modal-type').value,start:_dates.start||'',due:_dates.due||''});
+  }
   save();closeTaskModal();renderCurrentView();updateBoardBadge();
 }
 function deleteCurrentTask(){if(!editingTaskId)return;state.tasks=state.tasks.filter(t=>t.id!==editingTaskId);save();closeTaskModal();renderCurrentView();updateBoardBadge();}
