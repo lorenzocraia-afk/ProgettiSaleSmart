@@ -1991,7 +1991,214 @@ input, textarea, select, button {
   width: 1px; height: 16px; background: var(--border); flex-shrink: 0;
 }
 
-/* ── TABLE STATUS FILTER BAR ── */
+/* ── SEARCH ── */
+#search-bar {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+#search-bar.visible { display: flex; }
+#search-input {
+  flex: 1;
+  height: 32px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface2);
+  padding: 0 10px;
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s;
+}
+#search-input:focus { border-color: var(--accent); background: var(--surface); }
+#search-input::placeholder { color: var(--text-faint); }
+#search-close-btn {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: var(--surface2);
+  color: var(--text-faint);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  font-size: 16px;
+  transition: background 0.15s;
+}
+#search-close-btn:hover { background: var(--surface3); color: var(--text-muted); }
+
+/* ── ARCHIVED VIEW (improved) ── */
+#view-archived {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0;
+  -webkit-overflow-scrolling: touch;
+}
+.archived-inner {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 20px 24px 40px;
+}
+@media (max-width: 600px) {
+  .archived-inner { padding: 12px 12px 40px; }
+}
+.archived-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.archived-toolbar-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+.archived-toolbar-count {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text-faint);
+  margin-left: 6px;
+}
+.archived-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 80px 24px;
+  color: var(--text-faint);
+  text-align: center;
+}
+.archived-empty-icon { opacity: 0.2; }
+.archived-empty-title { font-size: 16px; font-weight: 600; color: var(--text-muted); }
+.archived-empty-sub { font-size: 13px; max-width: 260px; line-height: 1.6; }
+
+.archived-proj-section { margin-bottom: 24px; }
+.archived-proj-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 0 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+.archived-proj-label-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.archived-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  margin-bottom: 6px;
+  transition: border-color 0.15s, background 0.15s;
+}
+.archived-card:hover { border-color: var(--text-faint); background: var(--surface2); }
+.archived-card-check {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: var(--surface2);
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.archived-card-check svg { opacity: 0.4; }
+.archived-card-body {
+  flex: 1;
+  min-width: 0;
+}
+.archived-card-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-decoration: line-through;
+  text-decoration-color: var(--border);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.archived-card-sub {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+  flex-wrap: wrap;
+}
+.archived-card-meta {
+  font-size: 11px;
+  color: var(--text-faint);
+}
+.archived-card-assignee {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--text-faint);
+}
+.archived-assignee-dot {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 8px;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+}
+.archived-restore-btn {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  white-space: nowrap;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.archived-restore-btn:hover { color: var(--accent); border-color: var(--accent-border); background: var(--accent-dim); }
+
+/* ── ARCHIVE MODAL BUTTON ── */
+.archive-action-btn {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 500; color: var(--text-faint);
+  cursor: pointer; padding: 5px 10px;
+  border-radius: var(--radius-sm); border: 1px solid var(--border);
+  background: transparent; transition: all 0.15s;
+}
+.archive-action-btn:hover { color: var(--text-muted); border-color: var(--text-faint); background: var(--surface2); }
+.bulk-archive-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 7px 12px; border-radius: var(--radius);
+  background: var(--surface2); border: 1px dashed var(--border);
+  margin-bottom: 8px; gap: 8px;
+}
+.bulk-archive-bar-label { font-size: 11px; color: var(--text-faint); }
+.bulk-archive-bar-btn {
+  font-size: 11px; font-weight: 600; color: var(--text-muted); cursor: pointer;
+  padding: 3px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border);
+  background: var(--surface); white-space: nowrap; transition: all 0.15s; flex-shrink: 0;
+}
+.bulk-archive-bar-btn:hover { color: var(--accent); border-color: var(--accent-border); background: var(--accent-dim); }
+
 #table-status-filter-bar {
   display: none;
   align-items: center;
@@ -2232,7 +2439,17 @@ input, textarea, select, button {
       <span class="proj-arrow">▾</span>
     </button>
     <button class="header-add-btn" onclick="openTaskModal(null)" id="add-task-btn">+</button>
+    <button id="header-search-btn" onclick="toggleSearch()" style="width:34px;height:34px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);flex-shrink:0;transition:all 0.15s ease" title="Cerca">
+      <svg viewBox="0 0 16 16" fill="none" width="15" height="15" stroke="currentColor" stroke-width="1.5"><circle cx="6.5" cy="6.5" r="4"/><path d="M10 10l3 3"/></svg>
+    </button>
     <button onclick="openSettingsPanel()" style="width:34px;height:34px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:16px;flex-shrink:0;transition:all 0.15s ease" title="Impostazioni"><svg viewBox="0 0 16 16" fill="none" width="16" height="16" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.5"/><path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2M3.4 3.4l1.4 1.4M11.2 11.2l1.4 1.4M3.4 12.6l1.4-1.4M11.2 4.8l1.4-1.4"/></svg></button>
+  </div>
+
+  <!-- SEARCH BAR -->
+  <div id="search-bar">
+    <svg viewBox="0 0 16 16" fill="none" width="14" height="14" stroke="currentColor" stroke-width="1.5" style="flex-shrink:0;color:var(--text-faint)"><circle cx="6.5" cy="6.5" r="4"/><path d="M10 10l3 3"/></svg>
+    <input id="search-input" type="text" placeholder="Cerca task..." oninput="onSearchInput()" autocomplete="off" spellcheck="false">
+    <button id="search-close-btn" onclick="closeSearch()">×</button>
   </div>
 
   <!-- VIEW TABS -->
@@ -2256,6 +2473,10 @@ input, textarea, select, button {
       <button class="tab-btn" data-view="table" onclick="switchView('table')">
         <svg viewBox="0 0 16 16" fill="currentColor" width="14" height="14"><rect x="1" y="1" width="14" height="3" rx="1"/><rect x="1" y="6" width="14" height="3" rx="1"/><rect x="1" y="11" width="14" height="3" rx="1"/></svg>
         Tab
+      </button>
+      <button class="tab-btn" data-view="archived" onclick="switchView('archived')">
+        <svg viewBox="0 0 16 16" fill="none" width="14" height="14" stroke="currentColor" stroke-width="1.4"><path d="M2 4.5A1.5 1.5 0 013.5 3h9A1.5 1.5 0 0114 4.5v1A1.5 1.5 0 0112.5 7h-9A1.5 1.5 0 012 5.5v-1z"/><path d="M3 7v5.5A1.5 1.5 0 004.5 14h7a1.5 1.5 0 001.5-1.5V7"/><path d="M6 10h4"/></svg>
+        Completati
       </button>
     </div>
   </div>
@@ -2281,6 +2502,7 @@ input, textarea, select, button {
     <div id="view-board" style="display:none"></div>
     <div id="view-gantt" style="display:none;flex-direction:column"></div>
     <div id="view-table" style="display:none"></div>
+    <div id="view-archived" style="display:none"></div>
   </div>
 
   <!-- MOBILE FAB -->
@@ -2306,6 +2528,10 @@ input, textarea, select, button {
     <button class="mob-tab-btn" data-view="table" onclick="switchView('table')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="22" height="22"><rect x="3" y="3" width="18" height="4" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/><rect x="3" y="17" width="18" height="4" rx="1"/></svg>
       Tab
+    </button>
+    <button class="mob-tab-btn" data-view="archived" onclick="switchView('archived')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="22" height="22"><path d="M3 6.5A1.5 1.5 0 014.5 5h15A1.5 1.5 0 0121 6.5v1a1.5 1.5 0 01-1.5 1.5h-15A1.5 1.5 0 013 7.5v-1z"/><path d="M5 9v9a2 2 0 002 2h10a2 2 0 002-2V9"/><path d="M9 14h6"/></svg>
+      Archivio
     </button>
   </div>
 
@@ -2372,6 +2598,10 @@ input, textarea, select, button {
     </div>
     <div class="modal-actions">
       <button class="btn btn-danger" id="modal-delete-btn" onclick="deleteCurrentTask()" style="display:none">Elimina</button>
+      <button class="archive-action-btn" id="modal-archive-btn" onclick="archiveCurrentTask()" style="display:none">
+        <svg viewBox="0 0 16 16" fill="none" width="13" height="13" stroke="currentColor" stroke-width="1.4"><path d="M2 4.5A1.5 1.5 0 013.5 3h9A1.5 1.5 0 0114 4.5v1A1.5 1.5 0 0112.5 7h-9A1.5 1.5 0 012 5.5v-1z"/><path d="M3 7v5.5A1.5 1.5 0 004.5 14h7a1.5 1.5 0 001.5-1.5V7"/><path d="M6 10h4"/></svg>
+        Archivia
+      </button>
       <button class="btn btn-primary" onclick="saveTask()">Salva</button>
     </div>
   </div>
@@ -2802,8 +3032,129 @@ function fmtDate(iso) { if (!iso) return ''; const d=new Date(iso+'T00:00:00'); 
 function isOverdue(iso) { if (!iso) return false; return new Date(iso+'T00:00:00') < new Date(new Date().toDateString()); }
 function today() { return new Date().toISOString().slice(0,10); }
 function autoResize(el) { el.style.height='auto'; el.style.height=el.scrollHeight+'px'; }
-function activeTasks() { return state.tasks.filter(t => t.projectId === state.activeProjectId); }
+function activeTasks() { return state.tasks.filter(t => t.projectId === state.activeProjectId && !t.archived); }
 function tasksByStatus(s) { return activeTasks().filter(t => t.status === s); }
+
+// ── SEARCH ──
+let _searchQuery = '';
+
+function toggleSearch() {
+  const bar = document.getElementById('search-bar');
+  const isVisible = bar.classList.contains('visible');
+  if (isVisible) { closeSearch(); }
+  else { bar.classList.add('visible'); setTimeout(()=>document.getElementById('search-input').focus(), 80); }
+}
+function closeSearch() {
+  const bar = document.getElementById('search-bar');
+  bar.classList.remove('visible');
+  _searchQuery = '';
+  document.getElementById('search-input').value = '';
+  renderCurrentView();
+}
+function onSearchInput() {
+  _searchQuery = document.getElementById('search-input').value.trim().toLowerCase();
+  renderCurrentView();
+}
+
+// ── ARCHIVE ──
+function archiveTask(id) {
+  const t = state.tasks.find(t => t.id === id);
+  if (!t) return;
+  t.archived = true;
+  t.archivedAt = new Date().toISOString();
+  save(); renderCurrentView(); updateBoardBadge();
+}
+
+function archiveAllDone(projectId) {
+  const pid = projectId || state.activeProjectId;
+  let count = 0;
+  state.tasks.forEach(t => {
+    if (t.projectId === pid && t.status === 'done' && !t.archived) {
+      t.archived = true;
+      t.archivedAt = new Date().toISOString();
+      count++;
+    }
+  });
+  if (count) { save(); renderCurrentView(); updateBoardBadge(); showSync(`${count} task archiviati`, '', 'ok'); }
+}
+
+function restoreTask(id) {
+  const t = state.tasks.find(t => t.id === id);
+  if (!t) return;
+  t.archived = false;
+  t.archivedAt = null;
+  save(); renderArchived(); updateBoardBadge();
+}
+
+function renderArchived() {
+  const el = document.getElementById('view-archived');
+  let archived = state.tasks.filter(t => t.archived);
+  const q = _searchQuery;
+  if (q) archived = archived.filter(t => t.title.toLowerCase().includes(q) || (t.assignee||'').toLowerCase().includes(q));
+
+  if (!archived.length) {
+    const msg = q ? 'Nessun risultato per questa ricerca' : 'Nessun task archiviato';
+    const sub = q ? 'Prova con un\'altra parola chiave' : 'I task completati e archiviati appariranno qui';
+    el.innerHTML = `<div class="archived-inner"><div class="archived-empty">
+      <div class="archived-empty-icon"><svg viewBox="0 0 48 48" fill="none" width="56" height="56" stroke="currentColor" stroke-width="1.2"><path d="M6 13A3 3 0 019 10h30a3 3 0 013 3v2a3 3 0 01-3 3H9a3 3 0 01-3-3v-2z"/><path d="M10 18v18a4 4 0 004 4h20a4 4 0 004-4V18"/><path d="M19 28h10"/></svg></div>
+      <div class="archived-empty-title">${msg}</div>
+      <div class="archived-empty-sub">${sub}</div>
+    </div></div>`;
+    return;
+  }
+
+  // Group by project
+  const byProject = {};
+  archived.forEach(t => {
+    if (!byProject[t.projectId]) byProject[t.projectId] = [];
+    byProject[t.projectId].push(t);
+  });
+
+  const totalCount = archived.length;
+  let html = `<div class="archived-inner">
+    <div class="archived-toolbar">
+      <div>
+        <span class="archived-toolbar-title">Archiviati</span>
+        <span class="archived-toolbar-count">${totalCount} task</span>
+      </div>
+    </div>`;
+
+  Object.keys(byProject).forEach(pid => {
+    const proj = state.projects.find(p => p.id === pid);
+    const col = projectColor(pid);
+    const tasks = byProject[pid].sort((a,b) => (b.archivedAt||'').localeCompare(a.archivedAt||''));
+    html += `<div class="archived-proj-section">
+      <div class="archived-proj-label">
+        <span class="archived-proj-label-dot" style="background:${col}"></span>
+        ${escHtml(proj ? proj.name : 'Progetto eliminato')}
+        <span style="font-weight:400;text-transform:none;letter-spacing:0;margin-left:2px">${tasks.length}</span>
+      </div>`;
+    tasks.forEach(t => {
+      const dateStr = t.archivedAt ? new Date(t.archivedAt).toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'numeric'}) : '';
+      const assigneeHtml = t.assignee ? `<span class="archived-card-assignee">
+        <span class="archived-assignee-dot" style="background:${avatarColor(t.assignee)}">${escHtml(initials(t.assignee))}</span>
+        ${escHtml(t.assignee)}
+      </span>` : '';
+      html += `<div class="archived-card">
+        <div class="archived-card-check">
+          <svg viewBox="0 0 10 10" fill="none" width="10" height="10" stroke="currentColor" stroke-width="1.8"><path d="M2 5l2.5 2.5L8 3"/></svg>
+        </div>
+        <div class="archived-card-body">
+          <div class="archived-card-title">${escHtml(t.title)}</div>
+          <div class="archived-card-sub">
+            ${assigneeHtml}
+            ${dateStr ? `<span class="archived-card-meta">${dateStr}</span>` : ''}
+          </div>
+        </div>
+        <button class="archived-restore-btn" onclick="restoreTask('${t.id}')">↩ Ripristina</button>
+      </div>`;
+    });
+    html += `</div>`;
+  });
+
+  html += `</div>`;
+  el.innerHTML = html;
+}
 function escHtml(s) { if (!s) return ''; return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function addDays(iso, n) { const d=new Date(iso+'T00:00:00'); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10); }
 function daysBetween(a, b) { return Math.round((new Date(b+'T00:00:00')-new Date(a+'T00:00:00'))/86400000); }
@@ -2937,9 +3288,12 @@ function switchView(v) {
   if (v==='gantt') ganttEl.style.flexDirection = 'column';
   const tableEl = document.getElementById('view-table');
   tableEl.style.display = v==='table' ? '' : 'none';
-  // Hide filter bar on table view
-  document.getElementById('filter-sort-bar').style.display = v==='table' ? 'none' : '';
-  // Show table status filter bar only on table view
+  const archivedEl = document.getElementById('view-archived');
+  archivedEl.style.display = v==='archived' ? '' : 'none';
+
+  // Filter/sort bar: hide on table and archived
+  document.getElementById('filter-sort-bar').style.display = (v==='table'||v==='archived') ? 'none' : '';
+  // Table status filter bar: only on table
   const tsfBar = document.getElementById('table-status-filter-bar');
   if (v==='table') { tsfBar.classList.add('visible'); renderTableStatusFilterBar(); }
   else { tsfBar.classList.remove('visible'); }
@@ -2951,6 +3305,7 @@ function renderCurrentView() {
   else if (state.currentView==='board') renderBoard();
   else if (state.currentView==='gantt') renderGantt();
   else if (state.currentView==='table') renderTable();
+  else if (state.currentView==='archived') renderArchived();
 }
 
 function updateBoardBadge() {
@@ -3010,15 +3365,23 @@ function renderList() {
     });
   } else {
     // Single project mode (default) — group by status
+    const doneTasks = tasks.filter(t=>t.status==='done');
     const groups = [
       { id:'todo', label:'Da fare', tasks: tasks.filter(t=>t.status==='todo') },
       { id:'inprogress', label:'In corso', tasks: tasks.filter(t=>t.status==='inprogress') },
-      { id:'done', label:'Completati', tasks: tasks.filter(t=>t.status==='done') },
+      { id:'done', label:'Completati', tasks: doneTasks },
     ].filter(g=>g.tasks.length>0);
-    content = groups.map(g => `
-      <div class="section-label">${g.label} <span style="color:var(--text-faint);font-weight:400;text-transform:none;letter-spacing:0;font-size:11px">${g.tasks.length}</span></div>
-      ${g.tasks.map(t => taskCardHtml(t)).join('')}
-    `).join('');
+    content = groups.map(g => {
+      let html = `<div class="section-label">${g.label} <span style="color:var(--text-faint);font-weight:400;text-transform:none;letter-spacing:0;font-size:11px">${g.tasks.length}</span></div>`;
+      if (g.id === 'done' && g.tasks.length > 0) {
+        html += `<div class="bulk-archive-bar">
+          <span class="bulk-archive-bar-label">Archivia i task completati per tenerli puliti</span>
+          <span class="bulk-archive-bar-btn" onclick="archiveAllDone()">↓ Archivia tutti</span>
+        </div>`;
+      }
+      html += g.tasks.map(t => taskCardHtml(t)).join('');
+      return html;
+    }).join('');
   }
 
   if (!content && (_filterAssignee || isMultiProject)) {
@@ -3730,6 +4093,9 @@ function openTaskModal(taskId) {
     setDateVal('start',t.start||''); setDateVal('due',t.due||'');
     document.getElementById('modal-check').classList.toggle('checked',t.status==='done');
     deleteBtn.style.display='';
+    // Show archive button only for done tasks
+    const archiveBtn = document.getElementById('modal-archive-btn');
+    if (archiveBtn) archiveBtn.style.display = t.status==='done' ? '' : 'none';
   } else {
     document.getElementById('modal-title').value='';
     document.getElementById('modal-desc').value='';
@@ -3740,7 +4106,10 @@ function openTaskModal(taskId) {
     _dates.start=''; _dates.due='';
     setDateVal('start',''); setDateVal('due','');
     document.getElementById('modal-check').classList.remove('checked');
-    deleteBtn.style.display='none'; editingTaskId=null;
+    deleteBtn.style.display='none';
+    const archiveBtn = document.getElementById('modal-archive-btn');
+    if (archiveBtn) archiveBtn.style.display='none';
+    editingTaskId=null;
   }
   setTimeout(()=>{ ['modal-title','modal-desc'].forEach(id=>{const el=document.getElementById(id);el.style.height='auto';el.style.height=el.scrollHeight+'px';}); },0);
   document.getElementById('task-modal-overlay').style.display='flex';
@@ -3760,6 +4129,7 @@ function saveTask(){
   save();closeTaskModal();renderCurrentView();updateBoardBadge();
 }
 function deleteCurrentTask(){if(!editingTaskId)return;state.tasks=state.tasks.filter(t=>t.id!==editingTaskId);save();closeTaskModal();renderCurrentView();updateBoardBadge();}
+function archiveCurrentTask(){ const id = editingTaskId; if(!id) return; closeTaskModal(); archiveTask(id); }
 function createTask(title='',status='todo'){const t={id:uid(),projectId:state.activeProjectId,title,description:'',status,assignee:'',type:'',start:'',due:''};state.tasks.push(t);save();return t.id;}
 
 // ── PROJECT MODAL ──
@@ -4385,7 +4755,7 @@ function listScopedTasks() {
   if (_filterListProjects.length === 0) {
     return activeTasks();
   }
-  return state.tasks.filter(t => _filterListProjects.includes(t.projectId));
+  return state.tasks.filter(t => _filterListProjects.includes(t.projectId) && !t.archived);
 }
 
 function renderFilterBar() {
@@ -4456,7 +4826,7 @@ function setListProjectFilter(ids) {
 // Returns tasks for gantt: uses the same list project filter + assignee filter
 function ganttVisibleTasks() {
   const projectIds = _filterListProjects.length > 0 ? _filterListProjects : state.projects.map(p => p.id);
-  let tasks = state.tasks.filter(t => projectIds.includes(t.projectId) && t.title && t.title.trim() !== '');
+  let tasks = state.tasks.filter(t => projectIds.includes(t.projectId) && t.title && t.title.trim() !== '' && !t.archived);
   if (_filterAssignee) tasks = tasks.filter(t => t.assignee === _filterAssignee);
   return tasks;
 }
@@ -4493,7 +4863,9 @@ function setTableStatusFilter(status) {
 }
 
 function filteredSortedTasks(tasks) {
-  return _filterAssignee ? tasks.filter(t => t.assignee === _filterAssignee) : tasks;
+  let result = _filterAssignee ? tasks.filter(t => t.assignee === _filterAssignee) : tasks;
+  if (_searchQuery) result = result.filter(t => t.title.toLowerCase().includes(_searchQuery) || (t.assignee||'').toLowerCase().includes(_searchQuery));
+  return result;
 }
 
 // ── MANUAL REORDER (drag up/down in list view) ──
