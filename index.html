@@ -3497,9 +3497,10 @@ function renderBoard() {
   renderFilterBar();
   const el = document.getElementById('view-board');
   if (!state.activeProjectId) { el.innerHTML=emptyState('<svg viewBox="0 0 24 24" fill="none" width="32" height="32" stroke="currentColor" stroke-width="1.2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h6M8 16h4"/></svg>','Nessun progetto',''); return; }
+  const allScoped = listScopedTasks();
   const cols = [{id:'todo',label:'To Do'},{id:'inprogress',label:'In corso'},{id:'done',label:'Fatto'}];
   el.innerHTML = cols.map(col => {
-    const tasks = filteredSortedTasks(tasksByStatus(col.id));
+    const tasks = filteredSortedTasks(allScoped.filter(t => t.status === col.id));
     return `<div class="board-col" data-col="${col.id}" ondragover="onDragOver(event,'${col.id}')" ondrop="onDrop(event,'${col.id}')" ondragleave="onDragLeave(event)">
       <div class="board-col-header ${col.id}">
         <span class="col-status-dot" style="background:${col.id==='todo'?'var(--todo-color)':col.id==='inprogress'?'var(--inprogress-color)':'var(--done-color)'}"></span>
